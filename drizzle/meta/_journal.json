@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1780579957527,
+      "tag": "0000_numerous_sunspot",
+      "breakpoints": true
+    }
+  ]
+}
