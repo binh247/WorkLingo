@@ -23,3 +23,13 @@ export function speak(text: string, opts?: SpeakOptions): void {
 export function cancel(): void {
   if (isSupported()) window.speechSynthesis.cancel();
 }
+
+/** Đọc một từ theo cách đọc kana (reading) để phát âm chuẩn (docs/04 F8). */
+export function speakWord(reading: string): void {
+  speak(reading, { lang: "ja-JP" });
+}
+
+/** Đọc cả câu nguyên văn. */
+export function speakSentence(text: string): void {
+  speak(text, { lang: "ja-JP" });
+}

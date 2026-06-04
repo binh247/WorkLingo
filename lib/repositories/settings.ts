@@ -41,7 +41,15 @@ export async function upsertAppSetting(
 }
 
 /* ----------------------------- user_settings ----------------------------- */
-export async function getUserSettings(
+import { getConfig } from "@/lib/config";
+
+export type ResolvedUserSettings = {
+  enabledCardTypes: string[];
+  soundEnabled: boolean;
+  jlptLevel: string | null;
+};
+
+export async function getUserSettingsRow(
   userId: string,
 ): Promise<UserSettingsRow | null> {
   const rows = await db
@@ -52,13 +60,46 @@ export async function getUserSettings(
   return rows[0] ?? null;
 }
 
-/** Upsert tuỳ chỉnh của user (loại thẻ bật/tắt, âm thanh, JLPT) — Sprint 3/5. */
-export async function upsertUserSettings(
+/** Settings của user, fallback default (app_settings.default_card_types) nếu chưa có. */
+export async function getUserSettings(
   userId: string,
-  patch: Partial<Omit<UserSettingsRow, "userId">>,
+): Promise<ResolvedUserSettings> {
+  const row = await getUserSettingsRow(userId);
+  if (row) {
+    return {
+      enabledCardTypes: row.enabledCardTypes,
+      soundEnabled: row.soundEnabled,
+      jlptLevel: row.jlptLevel,
+    };
+  }
+  const def = await getConfig<string[]>("default_card_types");
+  return { enabledCardTypes: def, soundEnabled: true, jlptLevel: null };
+}
+
+export async function getEnabledCardTypes(userId: string): Promise<string[]> {
+  return (await getUserSettings(userId)).enabledCardTypes;
+}
+
+/** Upsert tuỳ chỉnh của user (loại thẻ bật/tắt, âm thanh). */
+export async function updateUserSettings(
+  userId: string,
+  patch: { enabledCardTypes?: string[]; soundEnabled?: boolean },
 ): Promise<void> {
   await db
     .insert(userSettings)
     .values({ userId, ...patch })
     .onConflictDoUpdate({ target: userSettings.userId, set: patch });
+}
+
+export async function setJlptLevel(
+  userId: string,
+  level: string,
+): Promise<void> {
+  await db
+    .insert(userSettings)
+    .values({ userId, jlptLevel: level })
+    .onConflictDoUpdate({
+      target: userSettings.userId,
+      set: { jlptLevel: level },
+    });
 }

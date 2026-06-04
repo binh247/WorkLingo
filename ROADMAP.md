@@ -16,7 +16,7 @@
 | GSD Phase | Tiêu đề | Feature ID (docs/04) | Giai đoạn | Trạng thái | Phụ thuộc | File kế hoạch |
 |-----------|---------|----------------------|-----------|------------|-----------|---------------|
 | 1 | Framework / Nền tảng | (hạ tầng — chưa gắn F; đặt nền cho mọi F: schema, lib/db, lib/config, lib/repositories, lib/ai, lib/auth) | MVP | ✅ done | — (không phụ thuộc) | [.planning/phase-1-framework-foundation-plan.md](.planning/phase-1-framework-foundation-plan.md) |
-| 2 | AI Ingest + Import + Duyệt transcript | F2, F2.5 | MVP | ⬜ chưa làm | Phase 1 | [.planning/phase-2-ai-ingest-import-review-plan.md](.planning/phase-2-ai-ingest-import-review-plan.md) |
+| 2 | AI Ingest + Import + Duyệt transcript | F2, F2.5 | MVP | ✅ done (⚠ gọi OpenAI thật chưa test — thiếu OPENAI_API_KEY) | Phase 1 | [.planning/phase-2-ai-ingest-import-review-plan.md](.planning/phase-2-ai-ingest-import-review-plan.md) |
 | 3 | Học + Chọn từ thông minh + Flashcard | F3 (gồm khởi tạo TTS F8 ở lib/tts) | MVP | ⬜ chưa làm | Phase 1, 2 | [.planning/phase-3-study-wordselection-flashcards-plan.md](.planning/phase-3-study-wordselection-flashcards-plan.md) |
 | 4 | Ôn tập SRS + Gamification | F4 (streak/XP/confetti mức cơ bản) | MVP | ⬜ chưa làm | Phase 1, 3 | [.planning/phase-4-srs-gamification-plan.md](.planning/phase-4-srs-gamification-plan.md) |
 | 5 | Auth + Admin + Dashboard + Deploy | F1, F1b, F1c, F1d, F5 | MVP | ⬜ chưa làm | Phase 1, 2, 3, 4 | [.planning/phase-5-auth-admin-dashboard-deploy-plan.md](.planning/phase-5-auth-admin-dashboard-deploy-plan.md) |

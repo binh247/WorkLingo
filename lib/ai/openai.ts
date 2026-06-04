@@ -8,7 +8,13 @@ import type { AIProvider, CompleteOptions } from "./index";
 
 let _client: OpenAI | null = null;
 function client(): OpenAI {
-  if (!_client) _client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  if (!_client) {
+    _client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      // Cho phép trỏ tới endpoint OpenAI-compatible (tự host / proxy).
+      baseURL: process.env.OPENAI_BASE_URL || undefined,
+    });
+  }
   return _client;
 }
 

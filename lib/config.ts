@@ -15,6 +15,7 @@ export const APP_SETTINGS_DEFAULTS = {
   default_card_types: { value: ["recognition", "cloze"], type: "json" as const, description: "Loại thẻ bật mặc định cho user mới" },
   tts_provider: { value: "webspeech", type: "string" as const, description: "Nhà cung cấp TTS: webspeech | cloud" },
   feature_flags: { value: {}, type: "json" as const, description: "Cờ bật/tắt tính năng" },
+  suggested_words_per_source: { value: 6, type: "number" as const, description: "Số từ đáng học gợi ý tối đa mỗi tài liệu" },
 } satisfies Record<string, { value: SettingValue; type: "string" | "number" | "bool" | "json"; description: string }>;
 
 export type ConfigKey = keyof typeof APP_SETTINGS_DEFAULTS;

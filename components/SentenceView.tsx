@@ -9,6 +9,8 @@ export interface SentenceViewProps {
   onWordClick?: (token: Token, index: number) => void;
   /** Lemma cần nhấn mạnh (vd câu i+1 ở Phase 3). */
   highlightWords?: Set<string>;
+  /** lemma → trạng thái: learning (xanh) / known (xám mờ). */
+  statusMap?: Map<string, "new" | "learning" | "known">;
   className?: string;
 }
 
@@ -20,12 +22,14 @@ export function SentenceView({
   tokens,
   onWordClick,
   highlightWords,
+  statusMap,
   className,
 }: SentenceViewProps) {
   return (
     <span className={cn("font-jp text-lg leading-loose text-ink", className)}>
       {tokens.map((t, i) => {
         const clickable = !!onWordClick && t.worthLearning;
+        const status = statusMap?.get(t.lemma || t.surface);
         const hot =
           t.worthLearning ||
           (highlightWords ? highlightWords.has(t.lemma) : false);
@@ -57,6 +61,9 @@ export function SentenceView({
             className={cn(
               clickable && "cursor-pointer rounded-md transition-colors",
               hot && "bg-[#FFF4CC] px-0.5 font-bold hover:bg-[#FFE894]",
+              status === "learning" &&
+                "bg-[#E8F9DC] underline decoration-brand decoration-2",
+              status === "known" && "text-ink-muted opacity-60",
             )}
           >
             {content}
