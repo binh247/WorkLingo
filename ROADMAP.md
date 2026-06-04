@@ -21,7 +21,7 @@
 | 4 | Ôn tập SRS + Gamification | F4 (streak/XP/confetti mức cơ bản) | MVP | ✅ done (chưa có asset mp3/Lottie — sound no-op) | Phase 1, 3 | [.planning/phase-4-srs-gamification-plan.md](.planning/phase-4-srs-gamification-plan.md) |
 | 5 | Auth + Admin + Dashboard + Deploy | F1, F1b, F1c, F1d, F5 | MVP | ✅ done — **MVP HOÀN CHỈNH** (Google/SMTP bật khi có env) | Phase 1, 2, 3, 4 | [.planning/phase-5-auth-admin-dashboard-deploy-plan.md](.planning/phase-5-auth-admin-dashboard-deploy-plan.md) |
 | 6 | GĐ2 — Audio/Video, YouTube, Ngữ pháp | F6, F7 (+ import phụ đề YouTube) | GĐ2 | ✅ F7 done (test thật); F6 audio/Whisper wired (cần endpoint Whisper) | Phase 2, 3 | [.planning/phase-6-phase2-media-grammar-plan.md](.planning/phase-6-phase2-media-grammar-plan.md) |
-| 7 | GĐ3 — Thống kê, Social, Export, Cloud TTS | Heatmap/thống kê chi tiết, Hearts/level/bảng xếp hạng, Export Anki, Cloud TTS + cache (nâng cấp F8) | GĐ3 | ⬜ chưa làm | Phase 3, 4, 5 | [.planning/phase-7-phase3-stats-social-export-plan.md](.planning/phase-7-phase3-stats-social-export-plan.md) |
+| 7 | GĐ3 — Thống kê, Social, Export, Cloud TTS | Heatmap/thống kê chi tiết, Hearts/level/bảng xếp hạng, Export Anki, Cloud TTS + cache (nâng cấp F8) | GĐ3 | ✅ stats/level/leaderboard/heatmap/export Anki done; Cloud TTS để sau (cần endpoint) | Phase 3, 4, 5 | [.planning/phase-7-phase3-stats-social-export-plan.md](.planning/phase-7-phase3-stats-social-export-plan.md) |
 
 > **Ghi chú feature:** Phase 1 là hạ tầng nền (không tương ứng 1 feature người
 > dùng cụ thể) nhưng tạo schema **đầy đủ mọi bảng** + các tầng lib cho các phase
