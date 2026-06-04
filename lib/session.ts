@@ -21,3 +21,12 @@ export async function requireUser(): Promise<CurrentUser> {
   if (!u) redirect("/login");
   return u;
 }
+
+/** Bắt buộc role=admin (đọc lại từ DB, không chỉ token). Sai → redirect. */
+export async function requireAdmin(): Promise<CurrentUser> {
+  const u = await requireUser();
+  const { getUserById } = await import("@/lib/repositories/users");
+  const row = await getUserById(u.id);
+  if (!row || row.disabled || row.role !== "admin") redirect("/dashboard");
+  return { ...u, role: "admin" };
+}

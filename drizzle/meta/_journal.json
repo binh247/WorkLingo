@@ -8,6 +8,13 @@
       "when": 1780579957527,
       "tag": "0000_numerous_sunspot",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1780581818163,
+      "tag": "0001_chilly_mojo",
+      "breakpoints": true
     }
   ]
 }

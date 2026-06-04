@@ -57,6 +57,11 @@ export const users = pgTable("users", {
   image: text("image"),
   // Mở rộng WorkLingo:
   role: roleEnum("role").notNull().default("user"),
+  passwordHash: text("password_hash"),
+  disabled: boolean("disabled").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 export const accounts = pgTable(

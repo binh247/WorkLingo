@@ -2,9 +2,9 @@
  * Repository: user_stats (XP, streak). SKELETON Phase 1 — lọc userId.
  * addXp / bumpStreak hoàn thiện ở Phase 4 (gamification).
  */
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { userStats } from "@/lib/db/schema";
+import { cards, userStats } from "@/lib/db/schema";
 import type { UserStatsRow } from "@/lib/db/schema";
 
 const DEFAULT_STATS = (userId: string): UserStatsRow => ({
@@ -78,4 +78,40 @@ export async function recordStudyDay(
       set: { streak, lastStudiedDate: today },
     });
   return streak;
+}
+
+/** Số liệu Dashboard (docs/04 F5). dueToday tính theo cuối ngày local (timezone). */
+export async function getDashboard(
+  userId: string,
+  timeZone: string,
+  now: Date = new Date(),
+): Promise<{ streak: number; xp: number; dueToday: number; totalCards: number }> {
+  const stats = await getStats(userId);
+
+  // Cuối ngày hôm nay theo timezone → ISO để so với fsrs_state->>'due'.
+  const todayStr = localDateStr(now, timeZone); // YYYY-MM-DD
+  const endOfToday = new Date(`${todayStr}T23:59:59`).toISOString();
+  const dueExpr = sql`(${cards.fsrsState} ->> 'due')`;
+
+  const dueRows = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(cards)
+    .where(
+      and(
+        eq(cards.userId, userId),
+        eq(cards.suspended, false),
+        sql`${dueExpr} <= ${endOfToday}`,
+      ),
+    );
+  const totalRows = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(cards)
+    .where(eq(cards.userId, userId));
+
+  return {
+    streak: stats.streak,
+    xp: stats.xp,
+    dueToday: dueRows[0]?.n ?? 0,
+    totalCards: totalRows[0]?.n ?? 0,
+  };
 }
