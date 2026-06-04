@@ -1,11 +1,12 @@
 /**
- * Repository: sources + sentences. SKELETON Phase 1 — chữ ký đầy đủ, lọc userId.
- * Logic ghi đầy đủ hoàn thiện ở Phase 2 (Ingest/Import). docs/02-architecture §6.
+ * Repository: sources + sentences. Mọi truy vấn lọc user_id (docs/02-architecture §6).
+ * UI/API không chạm Drizzle trực tiếp — gọi qua đây (chống lock-in).
  */
 import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { sentences, sources } from "@/lib/db/schema";
 import type { Sentence, Source } from "@/lib/db/schema";
+import type { SentenceData } from "@/lib/ai";
 
 export type NewSourceInput = {
   type: Source["type"];
@@ -33,25 +34,96 @@ export async function getSource(
   return rows[0] ?? null;
 }
 
-export async function createSource(
-  userId: string,
-  input: NewSourceInput,
-): Promise<Source> {
-  const rows = await db
-    .insert(sources)
-    .values({ userId, ...input })
-    .returning();
-  return rows[0];
-}
-
 export async function getSentences(sourceId: string): Promise<Sentence[]> {
   return db.select().from(sentences).where(eq(sentences.sourceId, sourceId));
 }
 
-export async function insertSentences(
+/**
+ * Tạo 1 source + N sentences trong MỘT transaction (tránh source mồ côi).
+ * Trả sourceId.
+ */
+export async function createSourceWithSentences(input: {
+  userId: string;
+  type: Source["type"];
+  title: string;
+  rawContent: string;
+  sentences: SentenceData[];
+}): Promise<{ sourceId: string; sentenceCount: number }> {
+  return db.transaction(async (tx) => {
+    const [src] = await tx
+      .insert(sources)
+      .values({
+        userId: input.userId,
+        type: input.type,
+        title: input.title,
+        rawContent: input.rawContent,
+      })
+      .returning({ id: sources.id });
+
+    if (input.sentences.length > 0) {
+      await tx.insert(sentences).values(
+        input.sentences.map((s) => ({
+          sourceId: src.id,
+          original: s.original,
+          text: s.text,
+          corrected: s.corrected,
+          note: s.note || null,
+          confidence: s.confidence,
+          tokens: s.tokens,
+          skipped: false,
+        })),
+      );
+    }
+    return { sourceId: src.id, sentenceCount: input.sentences.length };
+  });
+}
+
+/** Source + sentences của ĐÚNG user (null nếu không thuộc user). */
+export async function getSourceWithSentences(
   sourceId: string,
-  rows: Array<Omit<typeof sentences.$inferInsert, "sourceId">>,
-): Promise<void> {
-  if (rows.length === 0) return;
-  await db.insert(sentences).values(rows.map((r) => ({ ...r, sourceId })));
+  userId: string,
+): Promise<{ source: Source; sentences: Sentence[] } | null> {
+  const src = await getSource(userId, sourceId);
+  if (!src) return null;
+  const rows = await getSentences(sourceId);
+  return { source: src, sentences: rows };
+}
+
+/** Sửa text 1 câu — kiểm quyền qua source.user_id = userId. */
+export async function updateSentenceText(
+  sentenceId: string,
+  userId: string,
+  text: string,
+): Promise<boolean> {
+  const owned = await sentenceBelongsToUser(sentenceId, userId);
+  if (!owned) return false;
+  await db.update(sentences).set({ text }).where(eq(sentences.id, sentenceId));
+  return true;
+}
+
+export async function setSentenceSkipped(
+  sentenceId: string,
+  userId: string,
+  skipped: boolean,
+): Promise<boolean> {
+  const owned = await sentenceBelongsToUser(sentenceId, userId);
+  if (!owned) return false;
+  await db
+    .update(sentences)
+    .set({ skipped })
+    .where(eq(sentences.id, sentenceId));
+  return true;
+}
+
+async function sentenceBelongsToUser(
+  sentenceId: string,
+  userId: string,
+): Promise<boolean> {
+  const rows = await db
+    .select({ id: sentences.id })
+    .from(sentences)
+    .innerJoin(sources, eq(sentences.sourceId, sources.id))
+    .where(and(eq(sentences.id, sentenceId), eq(sources.userId, userId)))
+    .limit(1);
+  return rows.length > 0;
 }

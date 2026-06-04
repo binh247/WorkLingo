@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button3D } from "@/components/Button3D";
 import { Card } from "@/components/Card";
 import { ProgressBar } from "@/components/ProgressBar";
@@ -36,13 +37,12 @@ export default function Home() {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <Button3D variant="primary">Bắt đầu học</Button3D>
-          <Button3D variant="info">Ôn tập</Button3D>
-          <Button3D variant="xp">+10 XP</Button3D>
-          <Button3D variant="danger">Again</Button3D>
-          <Button3D variant="neutral" size="sm">
-            Đã biết
-          </Button3D>
+          <Link href="/import">
+            <Button3D variant="primary">Thêm tài liệu</Button3D>
+          </Link>
+          <Link href="/login">
+            <Button3D variant="neutral">Đăng nhập</Button3D>
+          </Link>
         </div>
 
         <p className="text-sm font-bold text-ink-muted">
