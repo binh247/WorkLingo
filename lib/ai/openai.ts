@@ -6,6 +6,18 @@ import OpenAI from "openai";
 import { getConfig } from "@/lib/config";
 import type { AIProvider, CompleteOptions } from "./index";
 
+/** Một số endpoint OpenAI-compatible bọc JSON trong ```json ... ``` — gỡ ra. */
+function stripFences(s: string): string {
+  const t = s.trim();
+  if (t.startsWith("```")) {
+    return t
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/\s*```$/, "")
+      .trim();
+  }
+  return t;
+}
+
 let _client: OpenAI | null = null;
 function client(): OpenAI {
   if (!_client) {
@@ -39,6 +51,6 @@ export class OpenAIProvider implements AIProvider {
     });
     const content = res.choices[0]?.message?.content;
     if (!content) throw new Error("OpenAI trả nội dung rỗng.");
-    return JSON.parse(content) as T;
+    return JSON.parse(stripFences(content)) as T;
   }
 }

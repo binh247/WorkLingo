@@ -64,3 +64,12 @@ export async function markWordKnown(lemma: string): Promise<void> {
   await markKnown(user.id, lemma);
   revalidatePath("/study");
 }
+
+/** F7 (GĐ2): giải thích ngữ pháp câu bằng AI (on-demand, không lưu). */
+export async function explainGrammarAction(
+  sentenceText: string,
+): Promise<{ summary: string; points: string[] }> {
+  await requireUser();
+  const { explainGrammar } = await import("@/lib/ai/grammar");
+  return explainGrammar(sentenceText);
+}

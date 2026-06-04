@@ -43,3 +43,6 @@ next-env.d.ts
 # Secret env (xem .env.example)
 .env
 .env*.local
+
+# Uploaded media (self-host storage)
+/storage

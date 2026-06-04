@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import type { Token } from "@/lib/db/types";
 import type { SuggestedWord } from "@/lib/study/word-selection";
 import type { WordStatus } from "@/lib/repositories/userWords";
-import { markWordKnown, saveWordAsCards } from "./actions";
+import { explainGrammarAction, markWordKnown, saveWordAsCards } from "./actions";
 
 type StudySentence = {
   id: string;
@@ -137,6 +137,7 @@ export function StudyClient({
                 🔊
               </Button3D>
             </div>
+            <GrammarPanel sentenceText={s.text} />
           </div>
         ))}
       </div>
@@ -154,5 +155,52 @@ export function StudyClient({
         />
       )}
     </main>
+  );
+}
+
+function GrammarPanel({ sentenceText }: { sentenceText: string }) {
+  const [data, setData] = React.useState<{
+    summary: string;
+    points: string[];
+  } | null>(null);
+  const [pending, startTransition] = React.useTransition();
+  const [error, setError] = React.useState(false);
+
+  function load() {
+    setError(false);
+    startTransition(async () => {
+      try {
+        setData(await explainGrammarAction(sentenceText));
+      } catch {
+        setError(true);
+      }
+    });
+  }
+
+  return (
+    <div className="mt-2">
+      {!data && (
+        <button
+          className="text-sm font-bold text-info-dark underline disabled:opacity-50"
+          disabled={pending}
+          onClick={load}
+        >
+          {pending ? "Đang giải thích…" : "📖 Giải thích ngữ pháp"}
+        </button>
+      )}
+      {error && (
+        <p className="text-sm font-bold text-danger">Không giải thích được.</p>
+      )}
+      {data && (
+        <div className="mt-1 rounded-xl bg-[#F0F8FF] p-3 text-sm">
+          <p className="font-bold text-ink">{data.summary}</p>
+          <ul className="mt-1 list-disc pl-5 text-ink">
+            {data.points.map((p, i) => (
+              <li key={i}>{p}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 }
