@@ -1,20 +1,84 @@
 /**
  * Repository: cards. LUÔN lọc userId. getDue hoàn thiện ở Phase 4 (SRS).
  */
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, lte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { cards } from "@/lib/db/schema";
-import type { Card } from "@/lib/db/schema";
-import type { FsrsState } from "@/lib/db/types";
+import { cards, notes, reviews, sentences } from "@/lib/db/schema";
+import type { Card, Note, Sentence } from "@/lib/db/schema";
+import { schedule, type FsrsState, type Rating } from "@/lib/srs";
 
 export type CardType = Card["type"];
+export type DueCard = { card: Card; note: Note; sentence: Sentence };
 
-/**
- * Lấy thẻ đến hạn của user (fsrs due <= now, chưa suspend). Phase 4 hoàn thiện.
- */
-export async function getDue(userId: string): Promise<Card[]> {
-  void userId; // TODO Phase 4
-  return [];
+const dueExpr = sql`(${cards.fsrsState} ->> 'due')`;
+
+/** Thẻ đến hạn của user (due<=now, chưa suspend) kèm note + sentence. */
+export async function getDueCards(
+  userId: string,
+  now: Date = new Date(),
+  limit = 50,
+): Promise<DueCard[]> {
+  const rows = await db
+    .select({ card: cards, note: notes, sentence: sentences })
+    .from(cards)
+    .innerJoin(notes, eq(cards.noteId, notes.id))
+    .innerJoin(sentences, eq(notes.sentenceId, sentences.id))
+    .where(
+      and(
+        eq(cards.userId, userId),
+        eq(cards.suspended, false),
+        lte(dueExpr, now.toISOString()),
+      ),
+    )
+    .orderBy(asc(dueExpr))
+    .limit(limit);
+  return rows;
+}
+
+export async function countDueCards(
+  userId: string,
+  now: Date = new Date(),
+): Promise<number> {
+  const rows = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(cards)
+    .where(
+      and(
+        eq(cards.userId, userId),
+        eq(cards.suspended, false),
+        lte(dueExpr, now.toISOString()),
+      ),
+    );
+  return rows[0]?.n ?? 0;
+}
+
+/** Chấm 1 thẻ: tính state mới (ts-fsrs), UPDATE fsrs_state + INSERT review (transaction). */
+export async function applyReview(
+  userId: string,
+  cardId: string,
+  rating: Rating,
+  now: Date = new Date(),
+): Promise<{ newDue: Date }> {
+  return db.transaction(async (tx) => {
+    const [c] = await tx
+      .select()
+      .from(cards)
+      .where(and(eq(cards.userId, userId), eq(cards.id, cardId)))
+      .limit(1);
+    if (!c) throw new Error("Thẻ không tồn tại hoặc không thuộc user");
+
+    const current = (c.fsrsState ?? {}) as unknown as FsrsState;
+    const { state, due } = schedule(current, rating, now);
+
+    await tx
+      .update(cards)
+      .set({ fsrsState: state as unknown as Record<string, unknown> })
+      .where(eq(cards.id, cardId));
+    await tx
+      .insert(reviews)
+      .values({ cardId, rating, reviewedAt: now });
+    return { newDue: due };
+  });
 }
 
 export async function saveCard(
@@ -56,7 +120,7 @@ export async function createCardsForNote(
   userId: string,
   noteId: string,
   types: CardType[],
-  fsrsState: FsrsState,
+  fsrsState: Record<string, unknown>,
 ): Promise<number> {
   const existing = await getCardTypesForNote(userId, noteId);
   const toCreate = types.filter((t) => !existing.has(t));

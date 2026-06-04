@@ -40,6 +40,9 @@ export default function Home() {
           <Link href="/import">
             <Button3D variant="primary">Thêm tài liệu</Button3D>
           </Link>
+          <Link href="/review">
+            <Button3D variant="info">Ôn tập</Button3D>
+          </Link>
           <Link href="/login">
             <Button3D variant="neutral">Đăng nhập</Button3D>
           </Link>

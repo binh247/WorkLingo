@@ -34,9 +34,48 @@ export async function addXp(userId: string, amount: number): Promise<void> {
     });
 }
 
-export async function bumpStreak(userId: string, today: string): Promise<void> {
-  // TODO Phase 4: logic streak theo app_timezone (giữ chữ ký + lọc userId).
-  void userId;
-  void today;
-  throw new Error("bumpStreak chưa triển khai — Phase 4");
+/** Ngày local (YYYY-MM-DD) theo timezone cấu hình. */
+export function localDateStr(now: Date, timeZone: string): string {
+  // en-CA cho định dạng YYYY-MM-DD ổn định.
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+}
+
+function daysBetween(a: string, b: string): number {
+  const da = new Date(a + "T00:00:00Z").getTime();
+  const db_ = new Date(b + "T00:00:00Z").getTime();
+  return Math.round((db_ - da) / 86400000);
+}
+
+/**
+ * Ghi nhận ngày học → cập nhật streak theo timezone (docs/04 F4, QĐ5).
+ * cùng ngày: giữ; hôm qua: +1; cách ≥2 ngày hoặc lần đầu: reset = 1.
+ * Trả streak mới.
+ */
+export async function recordStudyDay(
+  userId: string,
+  now: Date,
+  timeZone: string,
+): Promise<number> {
+  const today = localDateStr(now, timeZone);
+  const cur = await getStats(userId);
+  let streak = 1;
+  if (cur.lastStudiedDate) {
+    const diff = daysBetween(cur.lastStudiedDate, today);
+    if (diff === 0) streak = cur.streak; // cùng ngày
+    else if (diff === 1) streak = cur.streak + 1; // hôm qua
+    else streak = 1; // reset
+  }
+  await db
+    .insert(userStats)
+    .values({ userId, streak, lastStudiedDate: today })
+    .onConflictDoUpdate({
+      target: userStats.userId,
+      set: { streak, lastStudiedDate: today },
+    });
+  return streak;
 }

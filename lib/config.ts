@@ -16,6 +16,8 @@ export const APP_SETTINGS_DEFAULTS = {
   tts_provider: { value: "webspeech", type: "string" as const, description: "Nhà cung cấp TTS: webspeech | cloud" },
   feature_flags: { value: {}, type: "json" as const, description: "Cờ bật/tắt tính năng" },
   suggested_words_per_source: { value: 6, type: "number" as const, description: "Số từ đáng học gợi ý tối đa mỗi tài liệu" },
+  xp_per_review: { value: { again: 0, hard: 5, good: 10, easy: 10 }, type: "json" as const, description: "XP cộng theo rating mỗi lần ôn (1=Again..4=Easy)" },
+  app_timezone: { value: "Asia/Ho_Chi_Minh", type: "string" as const, description: "Timezone hệ thống để xác định ranh giới ngày (streak)" },
 } satisfies Record<string, { value: SettingValue; type: "string" | "number" | "bool" | "json"; description: string }>;
 
 export type ConfigKey = keyof typeof APP_SETTINGS_DEFAULTS;
