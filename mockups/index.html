@@ -1,0 +1,2298 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WorkLingo — Mockup đầy đủ chức năng</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet" />
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Nunito', 'sans-serif'],
+          jp: ['"Noto Sans JP"', 'sans-serif'],
+        },
+        colors: {
+          brand:  { DEFAULT: '#58CC02', dark: '#46A302' },
+          danger: { DEFAULT: '#FF4B4B', dark: '#E04343' },
+          xp: '#FFC800',
+          info:   { DEFAULT: '#1CB0F6', dark: '#1799D6' },
+          ink: '#3C3C3C',
+          muted: '#AFAFAF',
+        },
+      },
+    },
+  };
+</script>
+<style>
+  body { font-family: 'Nunito', sans-serif; color: #3C3C3C; background: #fff; }
+  .font-jp { font-family: 'Noto Sans JP', sans-serif; }
+
+  /* ============ BỘ COMPONENT CHUẨN (đồng nhất control) ============ */
+  /* Nút 3D kiểu Duolingo — tự chứa bo góc/padding/đậm để mọi nút đồng nhất */
+  .btn-3d {
+    border-bottom-width: 4px; border-radius: 1rem;
+    padding: 0.75rem 1.5rem; font-weight: 800; line-height: 1.2;
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    transition: all .08s ease; cursor: pointer; border-style: solid; border-width: 2px; border-bottom-width: 4px;
+  }
+  .btn-3d:active { border-bottom-width: 0; transform: translateY(4px); }
+  .btn-3d:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  .btn-3d.btn-sm { padding: 0.4rem 0.9rem; font-size: .875rem; border-radius: .75rem; }
+  /* Biến thể màu */
+  .btn-primary { background:#58CC02; border-color:#46A302; color:#fff; }
+  .btn-info    { background:#1CB0F6; border-color:#1799D6; color:#fff; }
+  .btn-danger  { background:#FF4B4B; border-color:#E04343; color:#fff; }
+  .btn-xp      { background:#FFC800; border-color:#E0AC00; color:#3C3C3C; }
+  .btn-neutral { background:#fff; border-color:#E5E5E5; color:#3C3C3C; }
+  /* Ô nhập & select chuẩn */
+  .wl-input, .wl-select {
+    width:100%; padding:0.75rem 1rem; border-radius:1rem;
+    border:2px solid #E5E5E5; background:#F7F7F7; font-weight:700; color:#3C3C3C; font-family:inherit;
+  }
+  .wl-input:focus, .wl-select:focus { outline:none; background:#fff; border-color:#1CB0F6; }
+  /* Thẻ/khối chuẩn */
+  .wl-card { background:#fff; border:2px solid #EEEEEE; border-radius:1.5rem; }
+  /* Badge tròn */
+  .wl-badge { display:inline-flex; align-items:center; gap:.25rem; font-weight:800; border-radius:9999px; padding:.15rem .6rem; font-size:.75rem; }
+  /* Chip lọc/từ */
+  .wl-chip { border:2px solid #E5E5E5; border-radius:9999px; padding:.35rem .9rem; font-weight:800; font-size:.875rem; background:#fff; color:#3C3C3C; cursor:pointer; }
+  .wl-chip.wl-chip-on { background:#E8F9DC; border-color:#58CC02; color:#46A302; }
+  /* ================================================================= */
+  /* Furigana */
+  ruby rt { font-size: .55em; color: #777; font-weight: 700; }
+  /* Animation */
+  .bounce-in { animation: bounceIn .35s ease; }
+  @keyframes bounceIn { 0%{transform:scale(.85);opacity:0;} 60%{transform:scale(1.04);} 100%{transform:scale(1);opacity:1;} }
+  .shake { animation: shake .35s ease; }
+  @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+  /* Nav active */
+  .nav-active { background: #E8F9DC; color: #46A302 !important; }
+  /* View switching */
+  .view { display: none; }
+  .view.view-active { display: block; }
+  /* thanh cuộn gọn */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #E5E5E5; border-radius: 10px; }
+</style>
+</head>
+<body class="font-sans">
+<div id="app-shell" class="flex min-h-screen">
+  <aside id="app-sidebar" class="w-64 shrink-0 border-r-2 border-[#EEEEEE] bg-white p-4 flex-col gap-1 hidden md:flex sticky top-0 h-screen">
+    <div class="flex items-center gap-2 px-2 py-3 mb-2">
+      <span class="text-3xl">🦉</span>
+      <span class="text-2xl font-extrabold text-brand">WorkLingo</span>
+    </div>
+      <button data-nav="dashboard" onclick="appShow('dashboard')"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-extrabold text-ink hover:bg-[#F2F2F2] transition-colors text-left">
+        <span class="text-xl">🏠</span><span>Trang chủ</span>
+      </button>
+      <button data-nav="library" onclick="appShow('library')"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-extrabold text-ink hover:bg-[#F2F2F2] transition-colors text-left">
+        <span class="text-xl">📚</span><span>Thư viện</span>
+      </button>
+      <button data-nav="import" onclick="appShow('import')"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-extrabold text-ink hover:bg-[#F2F2F2] transition-colors text-left">
+        <span class="text-xl">➕</span><span>Thêm tài liệu</span>
+      </button>
+      <button data-nav="transcript" onclick="appShow('transcript')"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-extrabold text-ink hover:bg-[#F2F2F2] transition-colors text-left">
+        <span class="text-xl">✏️</span><span>Duyệt & sửa</span>
+      </button>
+      <button data-nav="study" onclick="appShow('study')"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-extrabold text-ink hover:bg-[#F2F2F2] transition-colors text-left">
+        <span class="text-xl">📖</span><span>Học</span>
+      </button>
+      <button data-nav="cardtypes" onclick="appShow('cardtypes')"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-extrabold text-ink hover:bg-[#F2F2F2] transition-colors text-left">
+        <span class="text-xl">🃏</span><span>Loại thẻ</span>
+      </button>
+      <button data-nav="review" onclick="appShow('review')"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-extrabold text-ink hover:bg-[#F2F2F2] transition-colors text-left">
+        <span class="text-xl">🔥</span><span>Ôn tập</span>
+      </button>
+      <button data-nav="admin" onclick="appShow('admin')"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-extrabold text-ink hover:bg-[#F2F2F2] transition-colors text-left">
+        <span class="text-xl">🛡️</span><span>Quản trị</span>
+      </button>
+      <button data-nav="changepass" onclick="appShow('changepass')"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-extrabold text-ink hover:bg-[#F2F2F2] transition-colors text-left">
+        <span class="text-xl">🔒</span><span>Đổi mật khẩu</span>
+      </button>
+      <button data-nav="settings" onclick="appShow('settings')"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-extrabold text-ink hover:bg-[#F2F2F2] transition-colors text-left">
+        <span class="text-xl">⚙️</span><span>Cài đặt</span>
+      </button>
+    <div class="mt-auto">
+      <div class="flex items-center justify-around bg-[#F7F7F7] rounded-2xl py-3 px-2 font-extrabold">
+        <span class="text-orange-500">🔥 7</span>
+        <span class="text-xp">⭐ 1240</span>
+        <span class="text-danger">❤️ 5</span>
+      </div>
+      <button onclick="appShow('login')" class="w-full mt-2 text-sm font-bold text-muted hover:text-danger py-2">↩︎ Đăng xuất</button>
+    </div>
+  </aside>
+
+  <main id="app-main" class="flex-1 min-w-0">
+    <div id="app-mobilebar" class="md:hidden sticky top-0 z-20 bg-white border-b-2 border-[#EEE] px-4 py-2 flex items-center gap-2">
+      <span class="text-2xl">🦉</span>
+      <select onchange="appShow(this.value)" class="flex-1 font-extrabold text-ink bg-[#F7F7F7] rounded-xl px-3 py-2 border-2 border-[#EEE]">
+        <option value="dashboard">🏠 Trang chủ</option>
+        <option value="library">📚 Thư viện</option>
+        <option value="import">➕ Thêm tài liệu</option>
+        <option value="transcript">✏️ Duyệt & sửa</option>
+        <option value="study">📖 Học</option>
+        <option value="cardtypes">🃏 Loại thẻ</option>
+        <option value="review">🔥 Ôn tập</option>
+        <option value="admin">🛡️ Quản trị</option>
+        <option value="changepass">🔒 Đổi mật khẩu</option>
+        <option value="settings">⚙️ Cài đặt</option>
+      </select>
+    </div>
+<section id="view-login" class="view" data-fullbleed="true">
+<div class="min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-[#E8F9DC] via-[#F7F7F7] to-[#E3F4FF] px-4 py-10">
+
+  <div class="w-full max-w-md bounce-in">
+
+    <!-- Logo + slogan -->
+    <div class="text-center mb-8">
+      <div id="login-owl" class="text-7xl mb-2 select-none" style="filter:drop-shadow(0 6px 0 rgba(0,0,0,0.08));">🦉</div>
+      <h1 class="text-4xl font-extrabold text-brand tracking-tight">WorkLingo</h1>
+      <p class="mt-2 text-ink font-bold text-base">Học tiếng Nhật từ chính công việc của bạn</p>
+      <p class="mt-1 text-muted font-bold text-sm font-jp"><ruby>仕事<rt>しごと</rt></ruby>から<ruby>日本語<rt>にほんご</rt></ruby>を<ruby>学<rt>まな</rt></ruby>ぼう</p>
+    </div>
+
+    <!-- Form card -->
+    <div class="bg-white rounded-3xl border-2 border-[#E5E5E5] shadow-[0_4px_0_#E5E5E5] p-6 sm:p-8">
+
+      <h2 class="text-center text-xl font-extrabold text-ink mb-5">Đăng nhập</h2>
+
+      <label class="block text-sm font-bold text-muted mb-1 ml-1" for="login-email">Email</label>
+      <input id="login-email" type="email" autocomplete="email"
+             placeholder="ban@congty.vn"
+             class="w-full mb-4 px-4 py-3 rounded-2xl border-2 border-[#E5E5E5] bg-[#F7F7F7] text-ink font-bold placeholder:text-muted placeholder:font-semibold focus:bg-white focus:border-info focus:outline-none transition-colors" />
+
+      <label class="block text-sm font-bold text-muted mb-1 ml-1" for="login-password">Mật khẩu</label>
+      <div class="relative mb-1">
+        <input id="login-password" type="password" autocomplete="current-password"
+               placeholder="••••••••"
+               class="w-full px-4 py-3 pr-12 rounded-2xl border-2 border-[#E5E5E5] bg-[#F7F7F7] text-ink font-bold placeholder:text-muted focus:bg-white focus:border-info focus:outline-none transition-colors" />
+        <button type="button" id="login-toggle-pw" aria-label="Hiện mật khẩu"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-xl select-none">👁️</button>
+      </div>
+
+      <div class="text-right mb-5">
+        <a href="#" id="login-forgot" class="text-sm font-bold text-info hover:text-info-dark">Quên mật khẩu?</a>
+      </div>
+
+      <!-- Nút đăng nhập chính -->
+      <button id="login-submit" type="button"
+              class="btn-3d bg-brand border-brand-dark text-white w-full py-3.5 text-lg font-extrabold uppercase tracking-wide">
+        Đăng nhập
+      </button>
+
+      <!-- Phân cách -->
+      <div class="flex items-center gap-3 my-5">
+        <div class="flex-1 h-0.5 bg-[#E5E5E5] rounded-full"></div>
+        <span class="text-muted font-bold text-sm">hoặc</span>
+        <div class="flex-1 h-0.5 bg-[#E5E5E5] rounded-full"></div>
+      </div>
+
+      <!-- Google -->
+      <button id="login-google" type="button"
+              class="w-full py-3 rounded-2xl border-2 border-[#E5E5E5] bg-white text-ink font-extrabold flex items-center justify-center gap-3 hover:bg-[#F7F7F7] active:scale-[0.99] transition-all shadow-[0_2px_0_#E5E5E5]">
+        <span class="text-xl font-black select-none">
+          <span style="color:#4285F4;">G</span><span style="color:#EA4335;">o</span><span style="color:#FBBC05;">o</span><span style="color:#4285F4;">g</span><span style="color:#34A853;">l</span><span style="color:#EA4335;">e</span>
+        </span>
+        <span>Đăng nhập với Google</span>
+      </button>
+
+    </div>
+
+    <!-- Đăng ký -->
+    <p class="text-center mt-6 text-sm font-bold text-muted">
+      Chưa có tài khoản?
+      <a href="#" id="login-signup" class="text-brand hover:text-brand-dark font-extrabold">Đăng ký</a>
+    </p>
+
+  </div>
+
+</div>
+
+<script>(function(){
+  var root = document.querySelector('#view-login');
+  if(!root) return;
+
+  function login_go(){
+    if (typeof window.appShow === 'function') window.appShow('dashboard');
+  }
+
+  var submit = root.querySelector('#login-submit');
+  var google = root.querySelector('#login-google');
+  if (submit) submit.addEventListener('click', login_go);
+  if (google) google.addEventListener('click', login_go);
+
+  // Enter để đăng nhập
+  root.querySelectorAll('#login-email, #login-password').forEach(function(inp){
+    inp.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') { e.preventDefault(); login_go(); }
+    });
+  });
+
+  // Hiện/ẩn mật khẩu
+  var toggle = root.querySelector('#login-toggle-pw');
+  var pw = root.querySelector('#login-password');
+  if (toggle && pw) {
+    toggle.addEventListener('click', function(){
+      if (pw.type === 'password') {
+        pw.type = 'text';
+        toggle.textContent = '🙈';
+        toggle.setAttribute('aria-label', 'Ẩn mật khẩu');
+      } else {
+        pw.type = 'password';
+        toggle.textContent = '👁️';
+        toggle.setAttribute('aria-label', 'Hiện mật khẩu');
+      }
+    });
+  }
+
+  // Link phụ (mockup): owl lắc nhẹ báo "tính năng demo"
+  ['#login-forgot','#login-signup'].forEach(function(sel){
+    var el = root.querySelector(sel);
+    if (el) el.addEventListener('click', function(e){
+      e.preventDefault();
+      var owl = root.querySelector('#login-owl');
+      if (owl) { owl.classList.remove('shake'); void owl.offsetWidth; owl.classList.add('shake'); }
+    });
+  });
+})();</script>
+</section>
+
+<section id="view-dashboard" class="view" data-fullbleed="false">
+<div class="max-w-3xl mx-auto px-4 py-6">
+
+  <!-- Lời chào -->
+  <div class="mb-6 bounce-in">
+    <h1 class="text-3xl font-extrabold text-ink">Xin chào, Minh <span class="inline-block">👋</span></h1>
+    <p class="text-muted font-bold mt-1">Sẵn sàng học tiếng Nhật hôm nay chưa?</p>
+  </div>
+
+  <!-- Hàng 4 thẻ thống kê -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+    <div class="rounded-2xl border-2 border-orange-200 bg-orange-50 p-4 flex flex-col items-center text-center">
+      <div class="text-3xl">🔥</div>
+      <div class="text-2xl font-extrabold text-orange-500 mt-1">7</div>
+      <div class="text-xs font-bold text-muted mt-0.5">ngày Streak</div>
+    </div>
+    <div class="rounded-2xl border-2 border-yellow-200 bg-yellow-50 p-4 flex flex-col items-center text-center">
+      <div class="text-3xl">⭐</div>
+      <div class="text-2xl font-extrabold text-xp mt-1">1240</div>
+      <div class="text-xs font-bold text-muted mt-0.5">điểm XP</div>
+    </div>
+    <div class="rounded-2xl border-2 border-sky-200 bg-sky-50 p-4 flex flex-col items-center text-center">
+      <div class="text-3xl">🃏</div>
+      <div class="text-2xl font-extrabold text-info mt-1">12</div>
+      <div class="text-xs font-bold text-muted mt-0.5">đến hạn hôm nay</div>
+    </div>
+    <div class="rounded-2xl border-2 border-green-200 bg-green-50 p-4 flex flex-col items-center text-center">
+      <div class="text-3xl">📚</div>
+      <div class="text-2xl font-extrabold text-brand mt-1">86</div>
+      <div class="text-xs font-bold text-muted mt-0.5">tổng số thẻ</div>
+    </div>
+  </div>
+
+  <!-- Thẻ CTA nổi bật -->
+  <div class="rounded-3xl border-2 border-brand bg-green-50 p-6 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <div class="text-xl font-extrabold text-ink">Bạn có <span class="text-brand">12 thẻ</span> cần ôn hôm nay</div>
+      <p class="text-muted font-bold mt-1">Ôn ngay để giữ lửa streak 7 ngày của bạn! 🔥</p>
+    </div>
+    <button id="dashboard-review-btn" class="btn-3d bg-brand border-brand-dark text-white text-lg font-extrabold px-8 py-4 rounded-2xl whitespace-nowrap">
+      ÔN TẬP NGAY 🔥
+    </button>
+  </div>
+
+  <!-- Mục tiêu tuần -->
+  <div class="rounded-3xl border-2 border-gray-200 bg-white p-6 mb-6">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-lg font-extrabold text-ink">Mục tiêu tuần</h2>
+      <span class="font-extrabold text-brand">5/7 ngày</span>
+    </div>
+    <div class="h-5 w-full rounded-full bg-gray-100 overflow-hidden">
+      <div id="dashboard-goal-bar" class="h-full rounded-full bg-brand transition-all duration-1000 ease-out" style="width:0%"></div>
+    </div>
+    <p class="text-sm font-bold text-muted mt-2">Còn <span class="text-ink">2 ngày</span> nữa để hoàn thành mục tiêu tuần này 💪</p>
+  </div>
+
+  <!-- Biểu đồ hoạt động 7 ngày -->
+  <div class="rounded-3xl border-2 border-gray-200 bg-white p-6 mb-6">
+    <h2 class="text-lg font-extrabold text-ink mb-4">Hoạt động 7 ngày qua</h2>
+    <div class="flex items-end justify-between gap-2 h-40" id="dashboard-chart">
+      <div class="flex-1 flex flex-col items-center justify-end h-full gap-2">
+        <div class="dashboard-bar w-full rounded-xl bg-gray-200 transition-all duration-700 ease-out" data-h="45%" style="height:0%"></div>
+        <span class="text-xs font-bold text-muted">T2</span>
+      </div>
+      <div class="flex-1 flex flex-col items-center justify-end h-full gap-2">
+        <div class="dashboard-bar w-full rounded-xl bg-gray-200 transition-all duration-700 ease-out" data-h="70%" style="height:0%"></div>
+        <span class="text-xs font-bold text-muted">T3</span>
+      </div>
+      <div class="flex-1 flex flex-col items-center justify-end h-full gap-2">
+        <div class="dashboard-bar w-full rounded-xl bg-gray-200 transition-all duration-700 ease-out" data-h="30%" style="height:0%"></div>
+        <span class="text-xs font-bold text-muted">T4</span>
+      </div>
+      <div class="flex-1 flex flex-col items-center justify-end h-full gap-2">
+        <div class="dashboard-bar w-full rounded-xl bg-gray-200 transition-all duration-700 ease-out" data-h="85%" style="height:0%"></div>
+        <span class="text-xs font-bold text-muted">T5</span>
+      </div>
+      <div class="flex-1 flex flex-col items-center justify-end h-full gap-2">
+        <div class="dashboard-bar w-full rounded-xl bg-gray-200 transition-all duration-700 ease-out" data-h="55%" style="height:0%"></div>
+        <span class="text-xs font-bold text-muted">T6</span>
+      </div>
+      <div class="flex-1 flex flex-col items-center justify-end h-full gap-2">
+        <div class="dashboard-bar w-full rounded-xl bg-brand border-2 border-brand-dark transition-all duration-700 ease-out" data-h="65%" style="height:0%"></div>
+        <span class="text-xs font-extrabold text-brand">T7</span>
+      </div>
+      <div class="flex-1 flex flex-col items-center justify-end h-full gap-2">
+        <div class="dashboard-bar w-full rounded-xl bg-gray-200 transition-all duration-700 ease-out" data-h="40%" style="height:0%"></div>
+        <span class="text-xs font-bold text-muted">CN</span>
+      </div>
+    </div>
+    <p class="text-xs font-bold text-muted mt-3 text-center">Cột <span class="text-brand">xanh</span> là hôm nay 🟢</p>
+  </div>
+
+  <!-- Tài liệu gần đây -->
+  <div class="rounded-3xl border-2 border-gray-200 bg-white p-6 mb-2">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-extrabold text-ink">Tài liệu gần đây</h2>
+      <button id="dashboard-library-link" class="font-extrabold text-info hover:text-info-dark">Xem tất cả ›</button>
+    </div>
+
+    <div class="space-y-3">
+      <button class="dashboard-doc w-full text-left rounded-2xl border-2 border-gray-100 hover:border-info hover:bg-sky-50 transition p-4 flex items-center gap-4">
+        <div class="text-3xl">💼</div>
+        <div class="flex-1 min-w-0">
+          <div class="font-extrabold text-ink truncate">Họp team dev 30/05</div>
+          <div class="text-sm font-bold text-muted">Họp · 4 câu · 3 thẻ</div>
+        </div>
+        <div class="flex flex-col items-end">
+          <span class="text-xs font-extrabold text-brand">đọc 100%</span>
+          <div class="h-2 w-16 rounded-full bg-gray-100 overflow-hidden mt-1">
+            <div class="h-full rounded-full bg-brand" style="width:100%"></div>
+          </div>
+        </div>
+      </button>
+
+      <button class="dashboard-doc w-full text-left rounded-2xl border-2 border-gray-100 hover:border-info hover:bg-sky-50 transition p-4 flex items-center gap-4">
+        <div class="text-3xl">💬</div>
+        <div class="flex-1 min-w-0">
+          <div class="font-extrabold text-ink truncate">Chat với khách hàng A</div>
+          <div class="text-sm font-bold text-muted">Chat · 18 câu · 7 thẻ</div>
+        </div>
+        <div class="flex flex-col items-end">
+          <span class="text-xs font-extrabold text-info">đọc 60%</span>
+          <div class="h-2 w-16 rounded-full bg-gray-100 overflow-hidden mt-1">
+            <div class="h-full rounded-full bg-info" style="width:60%"></div>
+          </div>
+        </div>
+      </button>
+
+      <button class="dashboard-doc w-full text-left rounded-2xl border-2 border-gray-100 hover:border-info hover:bg-sky-50 transition p-4 flex items-center gap-4">
+        <div class="text-3xl">🎬</div>
+        <div class="flex-1 min-w-0">
+          <div class="font-extrabold text-ink truncate"><span class="font-jp"><ruby>日本語<rt>にほんご</rt></ruby>ニュース</span> (video)</div>
+          <div class="text-sm font-bold text-muted">YouTube · 40 câu · 12 thẻ</div>
+        </div>
+        <div class="flex flex-col items-end">
+          <span class="text-xs font-extrabold text-xp">đọc 30%</span>
+          <div class="h-2 w-16 rounded-full bg-gray-100 overflow-hidden mt-1">
+            <div class="h-full rounded-full bg-xp" style="width:30%"></div>
+          </div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>(function(){
+  var root = document.querySelector('#view-dashboard') || document;
+
+  // Animate progress bar mục tiêu tuần khi load
+  var bar = root.querySelector('#dashboard-goal-bar');
+  if (bar) {
+    setTimeout(function(){ bar.style.width = (5/7*100).toFixed(1) + '%'; }, 200);
+  }
+
+  // Animate chiều cao các cột biểu đồ hoạt động khi load
+  var bars = root.querySelectorAll('.dashboard-bar');
+  setTimeout(function(){
+    bars.forEach(function(b){
+      b.style.height = b.getAttribute('data-h') || '0%';
+    });
+  }, 250);
+
+  // CTA ôn tập ngay
+  var reviewBtn = root.querySelector('#dashboard-review-btn');
+  if (reviewBtn) {
+    reviewBtn.addEventListener('click', function(){
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 80, spread: 70, origin: { y: 0.7 } });
+      }
+      if (typeof window.appShow === 'function') window.appShow('review');
+    });
+  }
+
+  // Link xem tất cả -> thư viện
+  var libLink = root.querySelector('#dashboard-library-link');
+  if (libLink) {
+    libLink.addEventListener('click', function(){
+      if (typeof window.appShow === 'function') window.appShow('library');
+    });
+  }
+
+  // Thẻ tài liệu gần đây -> mở thư viện
+  root.querySelectorAll('.dashboard-doc').forEach(function(el){
+    el.addEventListener('click', function(){
+      if (typeof window.appShow === 'function') window.appShow('library');
+    });
+  });
+})();</script>
+</section>
+
+<section id="view-import" class="view" data-fullbleed="false">
+<div class="max-w-2xl mx-auto px-4 py-6">
+
+  <!-- Tiêu đề -->
+  <div class="mb-6 bounce-in">
+    <div class="flex items-center gap-3">
+      <button onclick="window.appShow('dashboard')" class="w-10 h-10 rounded-2xl border-2 border-gray-200 text-ink font-extrabold text-xl hover:bg-gray-50 transition flex items-center justify-center shrink-0">←</button>
+      <h1 class="text-3xl font-extrabold text-ink">Thêm tài liệu 📥</h1>
+    </div>
+    <p class="text-muted font-bold mt-2 ml-1">Dán nội dung buổi họp tiếng Nhật hoặc tải lên file .txt</p>
+  </div>
+
+  <!-- Chọn loại nguồn -->
+  <div class="mb-6">
+    <label class="block text-sm font-extrabold text-muted uppercase tracking-wide mb-3">Loại nguồn</label>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="import-source-grid">
+      <button type="button" data-src="chat" class="import-src-card rounded-2xl border-2 border-gray-200 bg-white p-4 text-center font-bold text-ink hover:border-brand transition">
+        <div class="text-3xl mb-1">💬</div>
+        <div class="text-sm">Chat</div>
+      </button>
+      <button type="button" data-src="meeting" class="import-src-card rounded-2xl border-2 border-brand bg-brand/10 p-4 text-center font-bold text-ink transition">
+        <div class="text-3xl mb-1">💼</div>
+        <div class="text-sm">Họp</div>
+      </button>
+      <button type="button" data-src="video" class="import-src-card rounded-2xl border-2 border-gray-200 bg-white p-4 text-center font-bold text-ink hover:border-brand transition">
+        <div class="text-3xl mb-1">🎬</div>
+        <div class="text-sm">Video/YouTube</div>
+      </button>
+      <button type="button" data-src="text" class="import-src-card rounded-2xl border-2 border-gray-200 bg-white p-4 text-center font-bold text-ink hover:border-brand transition">
+        <div class="text-3xl mb-1">📝</div>
+        <div class="text-sm">Text</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tiêu đề tài liệu -->
+  <div class="mb-6">
+    <label for="import-title" class="block text-sm font-extrabold text-muted uppercase tracking-wide mb-3">Tiêu đề</label>
+    <input id="import-title" type="text" value="Họp team dev 30/05"
+      class="w-full rounded-2xl border-2 border-gray-200 px-4 py-3 font-bold text-ink text-lg focus:border-info focus:outline-none transition" />
+  </div>
+
+  <!-- Khu nhập: kéo thả file -->
+  <div class="mb-5">
+    <label class="block text-sm font-extrabold text-muted uppercase tracking-wide mb-3">Nội dung</label>
+    <div id="import-drop" tabindex="0"
+      class="rounded-3xl border-2 border-dashed border-info/50 bg-info/5 p-7 text-center cursor-pointer hover:bg-info/10 hover:border-info transition mb-4">
+      <div class="text-5xl mb-2">📄</div>
+      <div class="font-extrabold text-ink">Kéo thả .txt hoặc bấm để chọn</div>
+      <div id="import-filename" class="text-sm font-bold text-info mt-1 hidden"></div>
+    </div>
+
+    <!-- Hoặc dán nội dung -->
+    <div class="flex items-center gap-3 my-2">
+      <div class="h-0.5 flex-1 bg-gray-100 rounded-full"></div>
+      <span class="text-xs font-extrabold text-muted uppercase">hoặc dán nội dung</span>
+      <div class="h-0.5 flex-1 bg-gray-100 rounded-full"></div>
+    </div>
+
+    <textarea id="import-content" rows="6"
+      class="font-jp w-full rounded-2xl border-2 border-gray-200 px-4 py-3 text-ink leading-relaxed focus:border-info focus:outline-none transition resize-none"
+      placeholder="Dán nội dung tiếng Nhật ở đây...">田中：おはようございます。今日の会議を始めます。
+鈴木：先週のタスクの確認が遅れてすみません。
+田中：大丈夫です。明日までに確認をお願いします。
+鈴木：承知しました。資料は来週共有します。</textarea>
+  </div>
+
+  <!-- Ghi chú audio -->
+  <div class="rounded-2xl border-2 border-info/30 bg-info/10 px-4 py-3 mb-7">
+    <p class="font-bold text-info-dark text-sm">💡 Có file audio gốc? Tải audio lên để nghe lại khi kiểm <span class="opacity-70">(sắp có)</span></p>
+  </div>
+
+  <!-- Nút phân tích -->
+  <button id="import-analyze" class="btn-3d bg-brand border-brand-dark text-white w-full py-4 text-xl font-extrabold rounded-2xl">
+    PHÂN TÍCH →
+  </button>
+
+</div>
+
+<script>(function(){
+  var view = document.querySelector('#view-import') || document;
+
+  // Chọn loại nguồn kiểu radio
+  var cards = view.querySelectorAll('.import-src-card');
+  cards.forEach(function(card){
+    card.addEventListener('click', function(){
+      cards.forEach(function(c){
+        c.classList.remove('border-brand','bg-brand/10');
+        c.classList.add('border-gray-200','bg-white','hover:border-brand');
+      });
+      card.classList.remove('border-gray-200','bg-white','hover:border-brand');
+      card.classList.add('border-brand','bg-brand/10');
+    });
+  });
+
+  // Vùng kéo thả file
+  var drop = view.querySelector('#import-drop');
+  var fnameEl = view.querySelector('#import-filename');
+  function import_showFile(name){
+    if(fnameEl){
+      fnameEl.textContent = '✅ ' + name;
+      fnameEl.classList.remove('hidden');
+    }
+  }
+  if(drop){
+    drop.addEventListener('click', function(){ import_showFile('hop_team_dev_3005.txt'); });
+    drop.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); import_showFile('hop_team_dev_3005.txt'); }
+    });
+    drop.addEventListener('dragover', function(e){
+      e.preventDefault();
+      drop.classList.add('bg-info/10','border-info');
+    });
+    drop.addEventListener('dragleave', function(){
+      drop.classList.remove('bg-info/10','border-info');
+    });
+    drop.addEventListener('drop', function(e){
+      e.preventDefault();
+      drop.classList.remove('bg-info/10','border-info');
+      var name = (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) ? e.dataTransfer.files[0].name : 'hop_team_dev_3005.txt';
+      import_showFile(name);
+    });
+  }
+
+  // Nút phân tích -> sang màn transcript
+  var btn = view.querySelector('#import-analyze');
+  if(btn){
+    btn.addEventListener('click', function(){
+      window.appShow('transcript');
+    });
+  }
+})();</script>
+</section>
+
+<section id="view-transcript" class="view" data-fullbleed="false">
+<div class="max-w-3xl mx-auto px-4 py-6 font-sans text-ink">
+
+  <!-- Tiêu đề + giải thích -->
+  <div class="bounce-in mb-6">
+    <div class="flex items-center gap-3 mb-2">
+      <span class="text-4xl">📝</span>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-ink">Duyệt &amp; sửa transcript</h1>
+    </div>
+    <p class="text-muted font-bold leading-snug">
+      Kiểm tra &amp; sửa câu trước khi học. Từ
+      <span class="px-1 rounded-md bg-orange-100 text-orange-600 underline decoration-orange-400 decoration-wavy underline-offset-2 font-extrabold">gạch chân CAM</span>
+      có thể là lỗi nhận dạng (Kuromoji báo từ lạ).
+    </p>
+  </div>
+
+  <!-- Thông tin nguồn -->
+  <div class="flex items-center gap-3 mb-5 p-4 rounded-2xl bg-white border-2 border-gray-200">
+    <span class="text-3xl">💼</span>
+    <div class="flex-1 min-w-0">
+      <div class="font-extrabold text-ink truncate">Họp team dev 30/05</div>
+      <div class="text-sm text-muted font-bold">Loại: Họp · 4 câu</div>
+    </div>
+    <span class="shrink-0 px-3 py-1 rounded-full bg-info/15 text-info font-extrabold text-sm">JLPT N4</span>
+  </div>
+
+  <!-- Toggle AI dọn dẹp -->
+  <div class="flex items-center justify-between gap-3 mb-6 p-4 rounded-2xl bg-info/10 border-2 border-info/30">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl">✨</span>
+      <div>
+        <div class="font-extrabold text-info-dark">AI dọn dẹp (OpenAI)</div>
+        <div class="text-sm text-muted font-bold">Gợi ý sửa lỗi nhận dạng tự động</div>
+      </div>
+    </div>
+    <button id="transcript-ai-toggle" type="button" role="switch" aria-checked="false"
+      onclick="transcript_toggleAI()"
+      class="relative w-16 h-9 rounded-full bg-gray-300 border-2 border-gray-400 transition-colors duration-200 shrink-0">
+      <span id="transcript-ai-knob"
+        class="absolute top-0.5 left-0.5 w-7 h-7 rounded-full bg-white shadow-md transition-transform duration-200"></span>
+    </button>
+  </div>
+
+  <!-- Danh sách câu -->
+  <div class="space-y-4 mb-8">
+
+    <!-- Câu 1 -->
+    <div class="transcript-card p-4 rounded-2xl bg-white border-2 border-gray-200 transition-all" data-idx="1">
+      <div class="flex items-start gap-3">
+        <span class="shrink-0 w-10 h-9 grid place-items-center rounded-full bg-brand/15 text-brand-dark font-extrabold font-jp text-sm">田中</span>
+        <div class="transcript-body flex-1 min-w-0">
+          <p class="transcript-text font-jp text-lg leading-relaxed text-ink">
+            おはようございます。<ruby>今日<rt>きょう</rt></ruby>の<ruby>会議<rt>かいぎ</rt></ruby>を<ruby>始<rt>はじ</rt></ruby>めます。
+          </p>
+          <p class="transcript-ai-hint hidden mt-2 text-sm font-bold text-info-dark bg-info/10 rounded-xl px-3 py-2">
+            ✨ Gợi ý: Câu này có vẻ ổn, không cần sửa.
+          </p>
+        </div>
+      </div>
+      <div class="transcript-actions flex gap-2 mt-3 justify-end">
+        <button type="button" onclick="transcript_edit(this)" class="px-4 py-1.5 rounded-xl border-2 border-gray-300 font-extrabold text-ink hover:bg-gray-50 active:translate-y-0.5">✏️ Sửa</button>
+        <button type="button" onclick="transcript_skip(this)" class="px-4 py-1.5 rounded-xl border-2 border-danger/40 font-extrabold text-danger hover:bg-danger/5 active:translate-y-0.5">🗑️ Bỏ qua</button>
+      </div>
+    </div>
+
+    <!-- Câu 2 (có lỗi STT: 格認) -->
+    <div class="transcript-card p-4 rounded-2xl bg-orange-50 border-2 border-orange-300 transition-all" data-idx="2">
+      <div class="flex items-start gap-3">
+        <span class="shrink-0 w-10 h-9 grid place-items-center rounded-full bg-info/15 text-info-dark font-extrabold font-jp text-sm">鈴木</span>
+        <div class="transcript-body flex-1 min-w-0">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-xs font-extrabold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">⚠️ Nghi ngờ lỗi nhận dạng</span>
+          </div>
+          <p class="transcript-text font-jp text-lg leading-relaxed text-ink">
+            <ruby>先週<rt>せんしゅう</rt></ruby>のタスクの<span class="px-1 rounded-md bg-orange-200 text-orange-700 underline decoration-orange-500 decoration-wavy underline-offset-2 font-extrabold"><ruby>格認<rt>かくにん</rt></ruby></span>が<ruby>遅<rt>おく</rt></ruby>れてすみません。
+          </p>
+          <p class="transcript-ai-hint hidden mt-2 text-sm font-bold text-info-dark bg-info/10 rounded-xl px-3 py-2">
+            ✨ Gợi ý sửa: <span class="font-jp text-orange-600 line-through">格認</span> → <span class="font-jp text-brand-dark font-extrabold">確認（かくにん）</span> &nbsp;·&nbsp; "xác nhận, kiểm tra"
+          </p>
+        </div>
+      </div>
+      <div class="transcript-actions flex gap-2 mt-3 justify-end">
+        <button type="button" onclick="transcript_edit(this)" class="px-4 py-1.5 rounded-xl border-2 border-orange-400 font-extrabold text-orange-600 bg-white hover:bg-orange-50 active:translate-y-0.5">✏️ Sửa</button>
+        <button type="button" onclick="transcript_skip(this)" class="px-4 py-1.5 rounded-xl border-2 border-danger/40 font-extrabold text-danger hover:bg-danger/5 active:translate-y-0.5">🗑️ Bỏ qua</button>
+      </div>
+    </div>
+
+    <!-- Câu 3 (đã sửa) -->
+    <div class="transcript-card p-4 rounded-2xl bg-white border-2 border-brand/40 transition-all" data-idx="3" data-edited="1">
+      <div class="flex items-start gap-3">
+        <span class="shrink-0 w-10 h-9 grid place-items-center rounded-full bg-brand/15 text-brand-dark font-extrabold font-jp text-sm">田中</span>
+        <div class="transcript-body flex-1 min-w-0">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="transcript-edited-badge text-xs font-extrabold text-brand-dark bg-brand/15 px-2 py-0.5 rounded-full">✓ đã sửa</span>
+          </div>
+          <p class="transcript-text font-jp text-lg leading-relaxed text-ink">
+            <ruby>大丈夫<rt>だいじょうぶ</rt></ruby>です。<ruby>明日<rt>あした</rt></ruby>までに<ruby>確認<rt>かくにん</rt></ruby>をお<ruby>願<rt>ねが</rt></ruby>いします。
+          </p>
+          <p class="transcript-ai-hint hidden mt-2 text-sm font-bold text-info-dark bg-info/10 rounded-xl px-3 py-2">
+            ✨ Gợi ý: Câu này đã được sửa, không cần thay đổi.
+          </p>
+        </div>
+      </div>
+      <div class="transcript-actions flex gap-2 mt-3 justify-end">
+        <button type="button" onclick="transcript_edit(this)" class="px-4 py-1.5 rounded-xl border-2 border-gray-300 font-extrabold text-ink hover:bg-gray-50 active:translate-y-0.5">✏️ Sửa</button>
+        <button type="button" onclick="transcript_skip(this)" class="px-4 py-1.5 rounded-xl border-2 border-danger/40 font-extrabold text-danger hover:bg-danger/5 active:translate-y-0.5">🗑️ Bỏ qua</button>
+      </div>
+    </div>
+
+    <!-- Câu 4 -->
+    <div class="transcript-card p-4 rounded-2xl bg-white border-2 border-gray-200 transition-all" data-idx="4">
+      <div class="flex items-start gap-3">
+        <span class="shrink-0 w-10 h-9 grid place-items-center rounded-full bg-info/15 text-info-dark font-extrabold font-jp text-sm">鈴木</span>
+        <div class="transcript-body flex-1 min-w-0">
+          <p class="transcript-text font-jp text-lg leading-relaxed text-ink">
+            <ruby>承知<rt>しょうち</rt></ruby>しました。<ruby>資料<rt>しりょう</rt></ruby>は<ruby>来週<rt>らいしゅう</rt></ruby><ruby>共有<rt>きょうゆう</rt></ruby>します。
+          </p>
+          <p class="transcript-ai-hint hidden mt-2 text-sm font-bold text-info-dark bg-info/10 rounded-xl px-3 py-2">
+            ✨ Gợi ý: Câu này có vẻ ổn, không cần sửa.
+          </p>
+        </div>
+      </div>
+      <div class="transcript-actions flex gap-2 mt-3 justify-end">
+        <button type="button" onclick="transcript_edit(this)" class="px-4 py-1.5 rounded-xl border-2 border-gray-300 font-extrabold text-ink hover:bg-gray-50 active:translate-y-0.5">✏️ Sửa</button>
+        <button type="button" onclick="transcript_skip(this)" class="px-4 py-1.5 rounded-xl border-2 border-danger/40 font-extrabold text-danger hover:bg-danger/5 active:translate-y-0.5">🗑️ Bỏ qua</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Nút xác nhận -->
+  <button type="button" onclick="window.appShow('study')"
+    class="btn-3d bg-brand border-brand-dark text-white w-full text-lg py-4 font-extrabold">
+    XÁC NHẬN &amp; HỌC →
+  </button>
+
+</div>
+
+<script>(function(){
+  var root = document.querySelector('#view-transcript');
+  if(!root) return;
+
+  // Trích text thuần từ câu (bỏ furigana trong <rt> và khoảng trắng thừa)
+  function transcript_plainText(p){
+    var clone = p.cloneNode(true);
+    clone.querySelectorAll('rt').forEach(function(rt){ rt.remove(); });
+    return clone.textContent.replace(/\s+/g,'');
+  }
+
+  // Toggle AI dọn dẹp
+  window.transcript_toggleAI = function(){
+    var sw = root.querySelector('#transcript-ai-toggle');
+    var knob = root.querySelector('#transcript-ai-knob');
+    var on = sw.getAttribute('aria-checked') !== 'true';
+    sw.setAttribute('aria-checked', on ? 'true' : 'false');
+    if(on){
+      sw.classList.remove('bg-gray-300','border-gray-400');
+      sw.classList.add('bg-info','border-info-dark');
+      knob.classList.add('translate-x-7');
+    } else {
+      sw.classList.add('bg-gray-300','border-gray-400');
+      sw.classList.remove('bg-info','border-info-dark');
+      knob.classList.remove('translate-x-7');
+    }
+    root.querySelectorAll('.transcript-ai-hint').forEach(function(h){
+      h.classList.toggle('hidden', !on);
+    });
+  };
+
+  // Sửa câu -> biến thành input + nút Lưu
+  window.transcript_edit = function(btn){
+    var card = btn.closest('.transcript-card');
+    if(card.dataset.editing === '1') return;
+    card.dataset.editing = '1';
+
+    var p = card.querySelector('.transcript-text');
+    var plain = transcript_plainText(p);
+    card.dataset.original = p.innerHTML;
+
+    var wrap = document.createElement('div');
+    wrap.className = 'transcript-edit-wrap flex items-center gap-2 mt-1';
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.value = plain;
+    input.className = 'transcript-input font-jp text-lg flex-1 min-w-0 rounded-xl border-2 border-info px-3 py-2 outline-none focus:border-info-dark';
+    var save = document.createElement('button');
+    save.type = 'button';
+    save.textContent = '💾 Lưu';
+    save.className = 'btn-3d bg-brand border-brand-dark text-white px-4 py-2 text-sm shrink-0';
+    save.addEventListener('click', function(){ transcript_save(card); });
+    wrap.appendChild(input);
+    wrap.appendChild(save);
+
+    p.classList.add('hidden');
+    p.insertAdjacentElement('afterend', wrap);
+    input.focus();
+    input.addEventListener('keydown', function(e){ if(e.key==='Enter') transcript_save(card); });
+  };
+
+  // Lưu chỉnh sửa
+  window.transcript_save = function(card){
+    var p = card.querySelector('.transcript-text');
+    var wrap = card.querySelector('.transcript-edit-wrap');
+    var input = card.querySelector('.transcript-input');
+    if(input){ p.textContent = input.value; }
+    if(wrap){ wrap.remove(); }
+    p.classList.remove('hidden');
+    card.dataset.editing = '0';
+    card.dataset.edited = '1';
+
+    // Gắn badge "đã sửa" nếu chưa có
+    var body = card.querySelector('.transcript-body');
+    if(!body.querySelector('.transcript-edited-badge')){
+      var badgeRow = document.createElement('div');
+      badgeRow.className = 'flex items-center gap-2 mb-1';
+      badgeRow.innerHTML = '<span class="transcript-edited-badge text-xs font-extrabold text-brand-dark bg-brand/15 px-2 py-0.5 rounded-full">✓ đã sửa</span>';
+      body.insertBefore(badgeRow, body.firstElementChild);
+    }
+
+    // Bỏ badge nghi ngờ lỗi nếu có
+    var warnBadge = body.querySelector('.transcript-warn-badge');
+    if(warnBadge && warnBadge.parentElement){ warnBadge.parentElement.remove(); }
+
+    // Đổi viền sang xanh + bỏ nền cam nghi ngờ
+    card.classList.remove('bg-orange-50','border-orange-300','border-gray-200');
+    card.classList.add('border-brand/40');
+  };
+
+  // Bỏ qua (toggle): câu mờ + gạch ngang
+  window.transcript_skip = function(btn){
+    var card = btn.closest('.transcript-card');
+    var skipped = card.dataset.skipped !== '1';
+    card.dataset.skipped = skipped ? '1' : '0';
+    var p = card.querySelector('.transcript-text');
+    if(skipped){
+      card.classList.add('opacity-50');
+      p.classList.add('line-through');
+      btn.textContent = '↩️ Khôi phục';
+    } else {
+      card.classList.remove('opacity-50');
+      p.classList.remove('line-through');
+      btn.textContent = '🗑️ Bỏ qua';
+    }
+  };
+
+  // Gắn class nhận diện cho badge nghi ngờ lỗi (để xoá khi lưu)
+  root.querySelectorAll('.transcript-card[data-idx="2"] .transcript-body span.text-orange-600').forEach(function(s){
+    if(s.textContent.indexOf('Nghi ngờ') !== -1){ s.classList.add('transcript-warn-badge'); }
+  });
+
+})();</script>
+</section>
+
+<section id="view-library" class="view" data-fullbleed="false">
+<div class="max-w-3xl mx-auto px-4 py-6">
+
+  <!-- Tiêu đề + nút thêm -->
+  <div class="flex items-center justify-between gap-3 mb-5 bounce-in">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-ink">📚 Thư viện</h1>
+      <p class="text-muted font-bold text-sm mt-1">Tài liệu của bạn — học từ ngữ cảnh thật</p>
+    </div>
+    <button onclick="window.appShow('import')" class="btn-3d bg-brand border-brand-dark text-white px-4 py-3 rounded-2xl font-extrabold text-sm sm:text-base whitespace-nowrap">
+      ➕ Thêm tài liệu
+    </button>
+  </div>
+
+  <!-- Thanh tìm kiếm -->
+  <div class="relative mb-4">
+    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted text-lg">🔍</span>
+    <input id="library-search" type="text" placeholder="Tìm tài liệu..."
+      class="w-full pl-11 pr-4 py-3 rounded-2xl border-2 border-gray-200 bg-white text-ink font-bold placeholder:text-muted placeholder:font-bold focus:outline-none focus:border-info transition-colors" />
+  </div>
+
+  <!-- Bộ lọc chip -->
+  <div class="flex flex-wrap gap-2 mb-6" id="library-chips">
+    <button data-filter="all"   class="library-chip is-active px-4 py-2 rounded-full border-2 font-extrabold text-sm transition-colors">Tất cả</button>
+    <button data-filter="Họp"   class="library-chip px-4 py-2 rounded-full border-2 font-extrabold text-sm transition-colors">💼 Họp</button>
+    <button data-filter="Chat"  class="library-chip px-4 py-2 rounded-full border-2 font-extrabold text-sm transition-colors">💬 Chat</button>
+    <button data-filter="Video" class="library-chip px-4 py-2 rounded-full border-2 font-extrabold text-sm transition-colors">🎬 Video</button>
+  </div>
+
+  <!-- Danh sách tài liệu -->
+  <div id="library-list" class="space-y-4">
+
+    <!-- 1 -->
+    <div class="library-card relative bg-white rounded-3xl border-2 border-gray-200 p-4 sm:p-5 transition-shadow hover:shadow-md"
+         data-type="Họp" data-title="Họp team dev 30/05">
+      <div class="flex items-start gap-3">
+        <div class="shrink-0 w-12 h-12 rounded-2xl bg-brand/10 border-2 border-brand/30 flex items-center justify-center text-2xl">💼</div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-extrabold text-ink text-base sm:text-lg truncate">Họp team dev 30/05</h3>
+          <p class="text-muted font-bold text-xs sm:text-sm mt-0.5">Họp · 4 câu · đã đào 3 thẻ · đọc 100%</p>
+          <div class="mt-3 h-3 w-full rounded-full bg-gray-100 overflow-hidden">
+            <div class="h-full rounded-full bg-brand" style="width:100%"></div>
+          </div>
+        </div>
+        <div class="shrink-0 flex flex-col items-center gap-2">
+          <button onclick="window.appShow('study')" title="Tiếp tục"
+            class="w-10 h-10 rounded-2xl bg-brand border-2 border-brand-dark text-white font-extrabold text-xl leading-none flex items-center justify-center hover:bg-brand-dark transition-colors">›</button>
+          <button onclick="library_toggleMenu(event,'library-menu-1')" title="Thêm"
+            class="w-10 h-10 rounded-2xl bg-gray-100 border-2 border-gray-200 text-ink font-extrabold text-xl leading-none flex items-center justify-center hover:bg-gray-200 transition-colors">⋯</button>
+        </div>
+      </div>
+      <div id="library-menu-1" class="library-menu hidden absolute right-4 top-16 z-10 w-40 bg-white rounded-2xl border-2 border-gray-200 shadow-lg overflow-hidden">
+        <button class="w-full text-left px-4 py-3 font-bold text-ink hover:bg-gray-100 transition-colors">✏️ Đổi tên</button>
+        <button class="w-full text-left px-4 py-3 font-bold text-danger hover:bg-danger/10 transition-colors border-t-2 border-gray-100">🗑️ Xóa</button>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="library-card relative bg-white rounded-3xl border-2 border-gray-200 p-4 sm:p-5 transition-shadow hover:shadow-md"
+         data-type="Chat" data-title="Chat với khách hàng A">
+      <div class="flex items-start gap-3">
+        <div class="shrink-0 w-12 h-12 rounded-2xl bg-info/10 border-2 border-info/30 flex items-center justify-center text-2xl">💬</div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-extrabold text-ink text-base sm:text-lg truncate">Chat với khách hàng A</h3>
+          <p class="text-muted font-bold text-xs sm:text-sm mt-0.5">Chat · 18 câu · đã đào 7 thẻ · đọc 60%</p>
+          <div class="mt-3 h-3 w-full rounded-full bg-gray-100 overflow-hidden">
+            <div class="h-full rounded-full bg-info" style="width:60%"></div>
+          </div>
+        </div>
+        <div class="shrink-0 flex flex-col items-center gap-2">
+          <button onclick="window.appShow('study')" title="Tiếp tục"
+            class="w-10 h-10 rounded-2xl bg-brand border-2 border-brand-dark text-white font-extrabold text-xl leading-none flex items-center justify-center hover:bg-brand-dark transition-colors">›</button>
+          <button onclick="library_toggleMenu(event,'library-menu-2')" title="Thêm"
+            class="w-10 h-10 rounded-2xl bg-gray-100 border-2 border-gray-200 text-ink font-extrabold text-xl leading-none flex items-center justify-center hover:bg-gray-200 transition-colors">⋯</button>
+        </div>
+      </div>
+      <div id="library-menu-2" class="library-menu hidden absolute right-4 top-16 z-10 w-40 bg-white rounded-2xl border-2 border-gray-200 shadow-lg overflow-hidden">
+        <button class="w-full text-left px-4 py-3 font-bold text-ink hover:bg-gray-100 transition-colors">✏️ Đổi tên</button>
+        <button class="w-full text-left px-4 py-3 font-bold text-danger hover:bg-danger/10 transition-colors border-t-2 border-gray-100">🗑️ Xóa</button>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="library-card relative bg-white rounded-3xl border-2 border-gray-200 p-4 sm:p-5 transition-shadow hover:shadow-md"
+         data-type="Họp" data-title="Họp review sprint 28/05">
+      <div class="flex items-start gap-3">
+        <div class="shrink-0 w-12 h-12 rounded-2xl bg-brand/10 border-2 border-brand/30 flex items-center justify-center text-2xl">💼</div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-extrabold text-ink text-base sm:text-lg truncate">Họp review sprint 28/05</h3>
+          <p class="text-muted font-bold text-xs sm:text-sm mt-0.5">Họp · 25 câu · đã đào 0 thẻ · chưa đọc</p>
+          <div class="mt-3 h-3 w-full rounded-full bg-gray-100 overflow-hidden">
+            <div class="h-full rounded-full bg-muted" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="shrink-0 flex flex-col items-center gap-2">
+          <button onclick="window.appShow('study')" title="Tiếp tục"
+            class="w-10 h-10 rounded-2xl bg-brand border-2 border-brand-dark text-white font-extrabold text-xl leading-none flex items-center justify-center hover:bg-brand-dark transition-colors">›</button>
+          <button onclick="library_toggleMenu(event,'library-menu-3')" title="Thêm"
+            class="w-10 h-10 rounded-2xl bg-gray-100 border-2 border-gray-200 text-ink font-extrabold text-xl leading-none flex items-center justify-center hover:bg-gray-200 transition-colors">⋯</button>
+        </div>
+      </div>
+      <div id="library-menu-3" class="library-menu hidden absolute right-4 top-16 z-10 w-40 bg-white rounded-2xl border-2 border-gray-200 shadow-lg overflow-hidden">
+        <button class="w-full text-left px-4 py-3 font-bold text-ink hover:bg-gray-100 transition-colors">✏️ Đổi tên</button>
+        <button class="w-full text-left px-4 py-3 font-bold text-danger hover:bg-danger/10 transition-colors border-t-2 border-gray-100">🗑️ Xóa</button>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="library-card relative bg-white rounded-3xl border-2 border-gray-200 p-4 sm:p-5 transition-shadow hover:shadow-md"
+         data-type="Video" data-title="日本語ニュース news">
+      <div class="flex items-start gap-3">
+        <div class="shrink-0 w-12 h-12 rounded-2xl bg-danger/10 border-2 border-danger/30 flex items-center justify-center text-2xl">🎬</div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-extrabold text-ink text-base sm:text-lg truncate"><span class="font-jp"><ruby>日本語<rt>にほんご</rt></ruby>ニュース</span> <span class="text-muted font-bold text-sm">(video)</span></h3>
+          <p class="text-muted font-bold text-xs sm:text-sm mt-0.5">YouTube · 40 câu · đã đào 12 thẻ · đọc 30%</p>
+          <div class="mt-3 h-3 w-full rounded-full bg-gray-100 overflow-hidden">
+            <div class="h-full rounded-full bg-danger" style="width:30%"></div>
+          </div>
+        </div>
+        <div class="shrink-0 flex flex-col items-center gap-2">
+          <button onclick="window.appShow('study')" title="Tiếp tục"
+            class="w-10 h-10 rounded-2xl bg-brand border-2 border-brand-dark text-white font-extrabold text-xl leading-none flex items-center justify-center hover:bg-brand-dark transition-colors">›</button>
+          <button onclick="library_toggleMenu(event,'library-menu-4')" title="Thêm"
+            class="w-10 h-10 rounded-2xl bg-gray-100 border-2 border-gray-200 text-ink font-extrabold text-xl leading-none flex items-center justify-center hover:bg-gray-200 transition-colors">⋯</button>
+        </div>
+      </div>
+      <div id="library-menu-4" class="library-menu hidden absolute right-4 top-16 z-10 w-40 bg-white rounded-2xl border-2 border-gray-200 shadow-lg overflow-hidden">
+        <button class="w-full text-left px-4 py-3 font-bold text-ink hover:bg-gray-100 transition-colors">✏️ Đổi tên</button>
+        <button class="w-full text-left px-4 py-3 font-bold text-danger hover:bg-danger/10 transition-colors border-t-2 border-gray-100">🗑️ Xóa</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Trạng thái rỗng khi tìm kiếm không ra -->
+  <div id="library-empty" class="hidden text-center py-12">
+    <div class="text-5xl mb-3">🔍</div>
+    <p class="font-extrabold text-ink">Không tìm thấy tài liệu nào</p>
+    <p class="text-muted font-bold text-sm mt-1">Thử từ khóa khác hoặc đổi bộ lọc nhé!</p>
+  </div>
+
+</div>
+
+<style>
+  #view-library .library-chip{ background:#fff; color:#AFAFAF; border-color:#E5E7EB; }
+  #view-library .library-chip.is-active{ background:#1CB0F6; color:#fff; border-color:#1799D6; }
+</style>
+
+<script>(function(){
+  var root = document.querySelector('#view-library');
+  if(!root) return;
+
+  var chips  = root.querySelectorAll('.library-chip');
+  var cards  = root.querySelectorAll('.library-card');
+  var search = root.querySelector('#library-search');
+  var empty  = root.querySelector('#library-empty');
+  var activeFilter = 'all';
+
+  function library_closeMenus(except){
+    root.querySelectorAll('.library-menu').forEach(function(m){
+      if(m !== except) m.classList.add('hidden');
+    });
+  }
+
+  function library_applyFilter(){
+    library_closeMenus(null);
+    var q = (search.value || '').trim().toLowerCase();
+    var visible = 0;
+    cards.forEach(function(card){
+      var type  = card.getAttribute('data-type');
+      var title = (card.getAttribute('data-title') || '').toLowerCase();
+      var matchType = (activeFilter === 'all') || (type === activeFilter);
+      var matchText = (q === '') || (title.indexOf(q) !== -1);
+      var show = matchType && matchText;
+      card.classList.toggle('hidden', !show);
+      if(show) visible++;
+    });
+    empty.classList.toggle('hidden', visible !== 0);
+  }
+
+  chips.forEach(function(chip){
+    chip.addEventListener('click', function(){
+      chips.forEach(function(c){ c.classList.remove('is-active'); });
+      chip.classList.add('is-active');
+      activeFilter = chip.getAttribute('data-filter');
+      library_applyFilter();
+    });
+  });
+
+  search.addEventListener('input', library_applyFilter);
+
+  // Menu nhỏ Đổi tên / Xóa (chỉ hiển thị)
+  window.library_toggleMenu = function(ev, id){
+    ev.stopPropagation();
+    var target = root.querySelector('#' + id);
+    library_closeMenus(target);
+    if(target) target.classList.toggle('hidden');
+  };
+
+  // Bấm ra ngoài thì đóng menu
+  document.addEventListener('click', function(e){
+    if(!root.contains(e.target)){
+      library_closeMenus(null);
+      return;
+    }
+    if(!e.target.closest('.library-menu') && !e.target.closest('[onclick^="library_toggleMenu"]')){
+      library_closeMenus(null);
+    }
+  });
+})();</script>
+</section>
+
+<section id="view-study" class="view" data-fullbleed="false">
+<div class="max-w-3xl mx-auto px-4 py-6">
+
+  <!-- Header -->
+  <div class="flex items-center gap-3 mb-5">
+    <button onclick="window.appShow('library')" class="w-11 h-11 rounded-2xl border-2 border-gray-200 bg-white text-ink text-xl font-extrabold flex items-center justify-center hover:bg-gray-50 transition">‹</button>
+    <div>
+      <h1 class="text-xl md:text-2xl font-extrabold text-ink leading-tight">💼 Họp team dev 30/05</h1>
+      <p class="text-sm font-bold text-muted">câu <span class="text-info">2</span>/4 · Đọc &amp; đào từ</p>
+    </div>
+  </div>
+
+  <!-- Banner gợi ý từ -->
+  <div class="rounded-3xl border-2 border-xp/40 bg-gradient-to-br from-xp/15 to-brand/10 p-5 mb-6">
+    <div class="flex items-start justify-between gap-3 mb-3 flex-wrap">
+      <p class="text-base font-extrabold text-ink">✨ Buổi họp này có <span class="text-brand-dark">6 từ đáng học</span> cho bạn:</p>
+      <button id="study-save-all-btn" onclick="study_saveAll()" class="btn-3d bg-brand border-brand-dark text-white text-sm px-4 py-2 rounded-2xl font-extrabold whitespace-nowrap">💾 Lưu tất cả</button>
+    </div>
+    <div id="study-chip-row" class="flex flex-wrap gap-2"></div>
+  </div>
+
+  <!-- Khu đọc -->
+  <h2 class="text-sm font-extrabold text-muted uppercase tracking-wide mb-3">📖 Nội dung buổi họp</h2>
+  <div class="space-y-3 mb-8">
+
+    <!-- Câu 1 -->
+    <div class="rounded-3xl border-2 border-gray-200 bg-white p-4 shadow-sm">
+      <div class="flex items-start gap-3">
+        <div class="w-9 h-9 rounded-full bg-info/15 text-info font-extrabold flex items-center justify-center shrink-0 text-sm font-jp">田</div>
+        <div class="font-jp text-lg md:text-xl leading-relaxed text-ink">
+          <span class="font-bold text-muted text-sm mr-1">田中：</span>おはようございます。<ruby>今日<rt>きょう</rt></ruby>の<button type="button" class="study-word" data-w="kaigi" onclick="study_open('kaigi')"><ruby>会議<rt>かいぎ</rt></ruby></button>を<ruby>始<rt>はじ</rt></ruby>めます。
+        </div>
+      </div>
+    </div>
+
+    <!-- Câu 2 (đang đọc) -->
+    <div class="rounded-3xl border-2 border-info bg-info/5 p-4 shadow-sm relative">
+      <span class="absolute -top-2 left-4 bg-info text-white text-[11px] font-extrabold px-2 py-0.5 rounded-full">đang đọc</span>
+      <div class="flex items-start gap-3">
+        <div class="w-9 h-9 rounded-full bg-brand/15 text-brand-dark font-extrabold flex items-center justify-center shrink-0 text-sm font-jp">鈴</div>
+        <div class="font-jp text-lg md:text-xl leading-relaxed text-ink">
+          <span class="font-bold text-muted text-sm mr-1">鈴木：</span><ruby>先週<rt>せんしゅう</rt></ruby>のタスクの<button type="button" class="study-word" data-w="kakunin" onclick="study_open('kakunin')"><ruby>確認<rt>かくにん</rt></ruby></button>が<ruby>遅<rt>おく</rt></ruby>れてすみません。
+        </div>
+      </div>
+    </div>
+
+    <!-- Câu 3 (chỉ có 1 từ lạ -> i+1) -->
+    <div class="rounded-3xl border-2 border-gray-200 bg-white p-4 shadow-sm relative">
+      <span class="absolute -top-2 right-4 bg-xp text-ink text-[11px] font-extrabold px-2 py-0.5 rounded-full">⭐ i+1</span>
+      <div class="flex items-start gap-3">
+        <div class="w-9 h-9 rounded-full bg-info/15 text-info font-extrabold flex items-center justify-center shrink-0 text-sm font-jp">田</div>
+        <div class="font-jp text-lg md:text-xl leading-relaxed text-ink">
+          <span class="font-bold text-muted text-sm mr-1">田中：</span><ruby>大丈夫<rt>だいじょうぶ</rt></ruby>です。<ruby>明日<rt>あした</rt></ruby>までに<button type="button" class="study-word" data-w="kakunin2" onclick="study_open('kakunin2')"><ruby>確認<rt>かくにん</rt></ruby></button>をお<ruby>願<rt>ねが</rt></ruby>いします。
+        </div>
+      </div>
+    </div>
+
+    <!-- Câu 4 -->
+    <div class="rounded-3xl border-2 border-gray-200 bg-white p-4 shadow-sm">
+      <div class="flex items-start gap-3">
+        <div class="w-9 h-9 rounded-full bg-brand/15 text-brand-dark font-extrabold flex items-center justify-center shrink-0 text-sm font-jp">鈴</div>
+        <div class="font-jp text-lg md:text-xl leading-relaxed text-ink">
+          <span class="font-bold text-muted text-sm mr-1">鈴木：</span><button type="button" class="study-word" data-w="shouchi" onclick="study_open('shouchi')"><ruby>承知<rt>しょうち</rt></ruby></button>しました。<button type="button" class="study-word" data-w="shiryou" onclick="study_open('shiryou')"><ruby>資料<rt>しりょう</rt></ruby></button>は<button type="button" class="study-word" data-w="raishuu" onclick="study_open('raishuu')"><ruby>来週<rt>らいしゅう</rt></ruby></button><button type="button" class="study-word" data-w="kyouyuu" onclick="study_open('kyouyuu')"><ruby>共有<rt>きょうゆう</rt></ruby></button>します。
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Điều hướng câu -->
+  <div class="flex items-center justify-between gap-3 mb-2">
+    <button type="button" class="btn-3d bg-white border-gray-300 text-ink px-5 py-3 rounded-2xl font-extrabold">‹ Câu trước</button>
+    <span class="text-sm font-bold text-muted">câu 2/4</span>
+    <button type="button" class="btn-3d bg-info border-info-dark text-white px-5 py-3 rounded-2xl font-extrabold">Câu sau ›</button>
+  </div>
+
+  <!-- POPUP chi tiết từ -->
+  <div id="study-popup-overlay" class="hidden fixed inset-0 z-40 bg-black/40 flex items-end md:items-center justify-center p-0 md:p-4" onclick="study_overlayClick(event)">
+    <div id="study-popup" class="bounce-in w-full md:max-w-md bg-white rounded-t-3xl md:rounded-3xl border-2 border-gray-200 shadow-2xl p-6 relative">
+      <button type="button" onclick="study_close()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-gray-100 text-ink text-lg font-extrabold flex items-center justify-center hover:bg-gray-200 transition">×</button>
+
+      <!-- Từ lớn -->
+      <div class="font-jp text-4xl font-extrabold text-ink mb-1" id="study-popup-kanji"><ruby>確認<rt>かくにん</rt></ruby></div>
+      <div class="text-lg font-bold text-info mb-4 font-jp" id="study-popup-kana">かくにん</div>
+
+      <div class="space-y-3 mb-5">
+        <div class="rounded-2xl border-2 border-gray-100 bg-gray-50 px-4 py-3">
+          <span class="block text-xs font-extrabold text-muted uppercase tracking-wide mb-0.5">Loại từ (Kuromoji)</span>
+          <span class="font-bold text-ink" id="study-popup-pos">danh từ + する</span>
+        </div>
+        <div class="rounded-2xl border-2 border-brand/20 bg-brand/5 px-4 py-3">
+          <span class="block text-xs font-extrabold text-brand-dark uppercase tracking-wide mb-0.5">🤖 Nghĩa (AI)</span>
+          <span class="font-bold text-ink" id="study-popup-mean">xác nhận, kiểm tra</span>
+        </div>
+        <div class="rounded-2xl border-2 border-xp/30 bg-xp/10 px-4 py-3">
+          <span class="block text-xs font-extrabold text-ink/60 uppercase tracking-wide mb-1">🟩 Câu ví dụ từ họp</span>
+          <span class="font-jp text-base font-bold text-ink" id="study-popup-ex">「<ruby>明日<rt>あした</rt></ruby>までに確認をお<ruby>願<rt>ねが</rt></ruby>いします」</span>
+        </div>
+      </div>
+
+      <button type="button" onclick="study_play()" class="w-full mb-3 rounded-2xl border-2 border-info/30 bg-info/10 text-info-dark font-extrabold py-2.5 hover:bg-info/20 transition">🔊 Phát âm</button>
+
+      <div class="flex gap-3">
+        <button type="button" id="study-popup-save" onclick="study_saveCard()" class="btn-3d bg-brand border-brand-dark text-white flex-1 py-3 rounded-2xl font-extrabold">➕ Lưu thành thẻ</button>
+        <button type="button" onclick="study_markKnown()" class="btn-3d bg-white border-gray-300 text-muted px-4 py-3 rounded-2xl font-extrabold whitespace-nowrap">Đã biết</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  #view-study .study-word{
+    background:rgba(255,200,0,.22);
+    border-bottom:2px dashed rgba(70,163,2,.5);
+    border-radius:6px;
+    padding:0 2px;
+    cursor:pointer;
+    transition:background .15s;
+    font:inherit;
+    color:inherit;
+  }
+  #view-study .study-word:hover{ background:rgba(255,200,0,.45); }
+  #view-study .study-word.study-saved{
+    background:rgba(88,204,2,.2);
+    border-bottom:2px solid rgba(70,163,2,.7);
+  }
+  #view-study .study-word.study-known{
+    background:transparent;
+    border-bottom:2px dotted #AFAFAF;
+    color:#AFAFAF;
+    opacity:.65;
+  }
+  #view-study .study-word.study-saved::after{ content:" ✓"; font-size:.7em; color:#46A302; font-weight:800; }
+</style>
+
+<script>(function(){
+  var root = document.querySelector('#view-study');
+  if(!root) return;
+
+  var DATA = {
+    kaigi:    { kanji:'会議', kana:'かいぎ',    pos:'danh từ',             mean:'cuộc họp',           ex:'<ruby>今日<rt>きょう</rt></ruby>の会議を<ruby>始<rt>はじ</rt></ruby>めます' },
+    kakunin:  { kanji:'確認', kana:'かくにん',  pos:'danh từ + する',      mean:'xác nhận, kiểm tra', ex:'<ruby>明日<rt>あした</rt></ruby>までに確認をお<ruby>願<rt>ねが</rt></ruby>いします' },
+    shiryou:  { kanji:'資料', kana:'しりょう',  pos:'danh từ',             mean:'tài liệu',           ex:'資料は<ruby>来週<rt>らいしゅう</rt></ruby><ruby>共有<rt>きょうゆう</rt></ruby>します' },
+    shouchi:  { kanji:'承知', kana:'しょうち',  pos:'danh từ + する',      mean:'hiểu, đồng ý',       ex:'承知しました' },
+    kyouyuu:  { kanji:'共有', kana:'きょうゆう', pos:'danh từ + する',      mean:'chia sẻ',            ex:'資料は来週共有します' },
+    raishuu:  { kanji:'来週', kana:'らいしゅう', pos:'danh từ (thời gian)', mean:'tuần sau',           ex:'資料は来週共有します' }
+  };
+
+  // alias: lần xuất hiện thứ 2 của 確認 trỏ về cùng data
+  var ALIAS = { kakunin2:'kakunin' };
+  function resolveKey(k){ return ALIAS[k] || k; }
+
+  var order = ['kaigi','kakunin','shiryou','shouchi','kyouyuu','raishuu'];
+
+  // trạng thái logic của từng từ (key chuẩn): null | 'saved' | 'known'
+  var stateMap = {};
+  order.forEach(function(k){ stateMap[k] = null; });
+
+  var current = null;
+
+  // Render chip row
+  var chipRow = root.querySelector('#study-chip-row'); if(!chipRow){ return; }
+  order.forEach(function(k){
+    var d = DATA[k];
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'study-chip rounded-2xl border-2 border-brand/40 bg-white px-3 py-1.5 text-sm font-extrabold text-ink hover:bg-brand/10 transition flex items-center gap-1';
+    b.setAttribute('data-chip', k);
+    b.innerHTML = '<span class="font-jp">'+d.kanji+'</span><span class="text-muted font-bold text-xs">'+d.mean+'</span>';
+    b.onclick = function(){ study_open(k); };
+    chipRow.appendChild(b);
+  });
+
+  function setSavedState(key, state){
+    var rk = resolveKey(key);
+    stateMap[rk] = state; // 'saved' | 'known'
+
+    // cập nhật mọi từ trong văn bản có cùng key chuẩn (kể cả alias)
+    root.querySelectorAll('.study-word').forEach(function(el){
+      if(resolveKey(el.getAttribute('data-w')) === rk){
+        el.classList.remove('study-saved','study-known');
+        if(state === 'saved') el.classList.add('study-saved');
+        if(state === 'known') el.classList.add('study-known');
+      }
+    });
+
+    // cập nhật chip
+    var chip = root.querySelector('.study-chip[data-chip="'+rk+'"]');
+    if(chip){
+      chip.classList.remove('border-brand','border-gray-300','opacity-50');
+      chip.style.background = '';
+      var oldTick = chip.querySelector('.study-chip-tick');
+      if(oldTick) oldTick.remove();
+      if(state === 'saved'){
+        chip.classList.add('border-brand');
+        chip.style.background = 'rgba(88,204,2,.12)';
+        var t = document.createElement('span');
+        t.className = 'study-chip-tick text-brand-dark';
+        t.textContent = '✓';
+        chip.appendChild(t);
+      } else if(state === 'known'){
+        chip.classList.add('border-gray-300','opacity-50');
+      } else {
+        chip.classList.add('border-brand/40');
+      }
+    }
+  }
+
+  window.study_open = function(key){
+    var rk = resolveKey(key);
+    var d = DATA[rk];
+    if(!d) return;
+    current = rk;
+
+    root.querySelector('#study-popup-kanji').innerHTML = '<ruby>'+d.kanji+'<rt>'+d.kana+'</rt></ruby>';
+    root.querySelector('#study-popup-kana').textContent = d.kana;
+    root.querySelector('#study-popup-pos').textContent = d.pos;
+    root.querySelector('#study-popup-mean').textContent = d.mean;
+    root.querySelector('#study-popup-ex').innerHTML = '「'+d.ex+'」';
+
+    // đồng bộ nút "Lưu thành thẻ" theo trạng thái hiện tại của từ
+    var saveBtn = root.querySelector('#study-popup-save');
+    if(stateMap[rk] === 'saved'){
+      saveBtn.innerHTML = '✓ Đã lưu';
+      saveBtn.className = 'btn-3d bg-gray-100 border-gray-300 text-muted flex-1 py-3 rounded-2xl font-extrabold';
+    } else {
+      saveBtn.innerHTML = '➕ Lưu thành thẻ';
+      saveBtn.className = 'btn-3d bg-brand border-brand-dark text-white flex-1 py-3 rounded-2xl font-extrabold';
+    }
+
+    root.querySelector('#study-popup-overlay').classList.remove('hidden');
+  };
+
+  window.study_close = function(){
+    root.querySelector('#study-popup-overlay').classList.add('hidden');
+    current = null;
+  };
+
+  window.study_overlayClick = function(e){
+    if(e.target && e.target.id === 'study-popup-overlay') study_close();
+  };
+
+  window.study_play = function(){
+    var k = root.querySelector('#study-popup-kanji');
+    if(k){ k.classList.remove('shake'); void k.offsetWidth; k.classList.add('shake'); }
+  };
+
+  window.study_saveCard = function(){
+    if(!current) return;
+    setSavedState(current, 'saved');
+    if(typeof confetti === 'function'){
+      confetti({ particleCount: 60, spread: 55, origin:{ y: 0.7 }, colors:['#58CC02','#FFC800','#1CB0F6'] });
+    }
+    study_close();
+  };
+
+  window.study_markKnown = function(){
+    if(!current) return;
+    setSavedState(current, 'known');
+    study_close();
+  };
+
+  window.study_saveAll = function(){
+    order.forEach(function(k){ setSavedState(k, 'saved'); });
+    var btn = root.querySelector('#study-save-all-btn');
+    if(btn){ btn.innerHTML = '✓ Đã lưu tất cả'; btn.disabled = true; btn.classList.add('opacity-70'); }
+    if(typeof confetti === 'function'){
+      confetti({ particleCount: 140, spread: 90, origin:{ y: 0.6 }, colors:['#58CC02','#FFC800','#1CB0F6','#FF4B4B'] });
+    }
+  };
+})();</script>
+</section>
+
+<section id="view-cardtypes" class="view" data-fullbleed="false">
+<div class="max-w-6xl mx-auto px-4 py-8">
+
+  <!-- Tiêu đề -->
+  <div class="flex items-center gap-3 mb-2">
+    <span class="text-4xl">🃏</span>
+    <h1 class="text-3xl md:text-4xl font-extrabold text-ink">Các loại thẻ</h1>
+  </div>
+  <p class="text-base md:text-lg text-ink/80 font-bold mb-4">
+    Một từ tạo nhiều loại thẻ. Phần nền
+    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-brand/20 text-brand-dark font-extrabold">🟩 XANH</span>
+    là nội dung lấy từ buổi họp của bạn.
+  </p>
+
+  <!-- Chip từ nguồn -->
+  <div class="flex flex-wrap items-center gap-2 mb-8">
+    <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl border-2 border-info/40 bg-info/10 text-info-dark font-bold text-sm">
+      💼 Từ buổi họp: Họp team dev 30/05
+    </span>
+    <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl border-2 border-xp/50 bg-xp/15 text-ink font-extrabold text-sm">
+      Từ đích: <span class="font-jp"><ruby>確認<rt>かくにん</rt></ruby></span> = xác nhận, kiểm tra
+    </span>
+    <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl border-2 border-muted/30 bg-white text-muted font-bold text-sm">
+      💡 Bấm vào thẻ để lật
+    </span>
+  </div>
+
+  <!-- 3 thẻ flashcard -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+
+    <!-- THẺ 1: Nhận diện -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-lg font-extrabold text-ink">① Nhận diện</h2>
+        <span class="text-xs font-bold px-2 py-1 rounded-lg bg-info/15 text-info-dark">JP → Việt</span>
+      </div>
+      <p class="text-sm font-bold text-muted mb-3">Luyện: đọc hiểu.</p>
+      <div class="cardtypes-card cursor-pointer select-none" data-flipped="false" style="perspective:1200px;">
+        <div class="cardtypes-inner relative w-full" style="min-height:320px; transition:transform .5s; transform-style:preserve-3d;">
+
+          <!-- Mặt trước -->
+          <div class="cardtypes-front absolute inset-0 rounded-3xl border-2 border-info/40 bg-white shadow-md p-5 flex flex-col" style="backface-visibility:hidden; -webkit-backface-visibility:hidden;">
+            <span class="text-xs font-extrabold text-info-dark mb-3">MẶT TRƯỚC</span>
+            <div class="flex-1 flex flex-col items-center justify-center gap-4">
+              <div class="font-jp text-5xl font-extrabold text-ink"><ruby>確認<rt>かくにん</rt></ruby></div>
+              <div class="w-full rounded-2xl bg-brand/10 border-2 border-brand/30 p-3">
+                <div class="text-[11px] font-extrabold text-brand-dark mb-1">🟩 từ buổi họp</div>
+                <p class="font-jp text-base text-ink leading-relaxed text-center">
+                  <ruby>明日<rt>あした</rt></ruby>までに<mark class="bg-xp/60 rounded px-1 font-bold"><ruby>確認<rt>かくにん</rt></ruby></mark>を<ruby>願<rt>ねが</rt></ruby>いします
+                </p>
+              </div>
+            </div>
+            <p class="text-center text-xs text-muted font-bold mt-3">Bấm để xem nghĩa →</p>
+          </div>
+
+          <!-- Mặt sau -->
+          <div class="cardtypes-back absolute inset-0 rounded-3xl border-2 border-brand bg-brand/5 shadow-md p-5 flex flex-col" style="backface-visibility:hidden; -webkit-backface-visibility:hidden; transform:rotateY(180deg);">
+            <span class="text-xs font-extrabold text-brand-dark mb-3">MẶT SAU</span>
+            <div class="flex-1 flex flex-col items-center justify-center gap-3 text-center">
+              <div class="font-jp text-3xl font-extrabold text-ink">かくにん</div>
+              <div class="text-2xl font-extrabold text-brand-dark">xác nhận, kiểm tra</div>
+              <div class="text-xs font-bold text-muted">danh từ + する</div>
+            </div>
+            <p class="text-center text-xs text-muted font-bold mt-3">← Bấm để lật lại</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- THẺ 2: Cloze -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-lg font-extrabold text-ink">② Cloze</h2>
+        <span class="text-xs font-bold px-2 py-1 rounded-lg bg-xp/20 text-ink">điền câu</span>
+      </div>
+      <p class="text-sm font-bold text-muted mb-3">Luyện: dùng từ trong ngữ cảnh.</p>
+      <div class="cardtypes-card cursor-pointer select-none" data-flipped="false" style="perspective:1200px;">
+        <div class="cardtypes-inner relative w-full" style="min-height:320px; transition:transform .5s; transform-style:preserve-3d;">
+
+          <!-- Mặt trước -->
+          <div class="cardtypes-front absolute inset-0 rounded-3xl border-2 border-xp/50 bg-white shadow-md p-5 flex flex-col" style="backface-visibility:hidden; -webkit-backface-visibility:hidden;">
+            <span class="text-xs font-extrabold text-ink/70 mb-3">MẶT TRƯỚC</span>
+            <div class="flex-1 flex flex-col items-center justify-center">
+              <div class="w-full rounded-2xl bg-brand/10 border-2 border-brand/30 p-4">
+                <div class="text-[11px] font-extrabold text-brand-dark mb-2">🟩 từ buổi họp</div>
+                <p class="font-jp text-xl text-ink leading-relaxed text-center">
+                  <ruby>明日<rt>あした</rt></ruby>までに<span class="inline-block min-w-[56px] border-b-4 border-dashed border-xp align-middle">&nbsp;</span>を<ruby>願<rt>ねが</rt></ruby>いします
+                </p>
+              </div>
+              <p class="text-sm font-bold text-muted mt-4">Điền từ còn thiếu</p>
+            </div>
+            <p class="text-center text-xs text-muted font-bold mt-3">Bấm để xem đáp án →</p>
+          </div>
+
+          <!-- Mặt sau -->
+          <div class="cardtypes-back absolute inset-0 rounded-3xl border-2 border-brand bg-brand/5 shadow-md p-5 flex flex-col" style="backface-visibility:hidden; -webkit-backface-visibility:hidden; transform:rotateY(180deg);">
+            <span class="text-xs font-extrabold text-brand-dark mb-3">MẶT SAU</span>
+            <div class="flex-1 flex flex-col items-center justify-center gap-3 text-center">
+              <div class="font-jp text-5xl font-extrabold text-ink"><ruby>確認<rt>かくにん</rt></ruby></div>
+              <div class="font-jp text-2xl font-bold text-brand-dark">かくにん</div>
+            </div>
+            <p class="text-center text-xs text-muted font-bold mt-3">← Bấm để lật lại</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- THẺ 3: Sản sinh -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-lg font-extrabold text-ink">③ Sản sinh</h2>
+        <span class="text-xs font-bold px-2 py-1 rounded-lg bg-danger/15 text-danger-dark">Việt → JP</span>
+      </div>
+      <p class="text-sm font-bold text-muted mb-3">Luyện: chủ động nhớ từ.</p>
+      <div class="cardtypes-card cursor-pointer select-none" data-flipped="false" style="perspective:1200px;">
+        <div class="cardtypes-inner relative w-full" style="min-height:320px; transition:transform .5s; transform-style:preserve-3d;">
+
+          <!-- Mặt trước -->
+          <div class="cardtypes-front absolute inset-0 rounded-3xl border-2 border-danger/40 bg-white shadow-md p-5 flex flex-col" style="backface-visibility:hidden; -webkit-backface-visibility:hidden;">
+            <span class="text-xs font-extrabold text-danger-dark mb-3">MẶT TRƯỚC</span>
+            <div class="flex-1 flex flex-col items-center justify-center gap-3 text-center">
+              <div class="text-3xl font-extrabold text-ink">xác nhận / kiểm tra</div>
+              <div class="text-sm font-bold text-muted">Hãy nhớ lại từ tiếng Nhật</div>
+            </div>
+            <p class="text-center text-xs text-muted font-bold mt-3">Bấm để xem từ →</p>
+          </div>
+
+          <!-- Mặt sau -->
+          <div class="cardtypes-back absolute inset-0 rounded-3xl border-2 border-brand bg-brand/5 shadow-md p-5 flex flex-col" style="backface-visibility:hidden; -webkit-backface-visibility:hidden; transform:rotateY(180deg);">
+            <span class="text-xs font-extrabold text-brand-dark mb-3">MẶT SAU</span>
+            <div class="flex-1 flex flex-col items-center justify-center gap-3">
+              <div class="text-center">
+                <div class="font-jp text-4xl font-extrabold text-ink"><ruby>確認<rt>かくにん</rt></ruby></div>
+                <div class="font-jp text-xl font-bold text-brand-dark">かくにん</div>
+              </div>
+              <div class="w-full rounded-2xl bg-brand/10 border-2 border-brand/30 p-3">
+                <div class="text-[11px] font-extrabold text-brand-dark mb-1">🟩 ví dụ từ buổi họp</div>
+                <p class="font-jp text-sm text-ink leading-relaxed text-center">
+                  <ruby>明日<rt>あした</rt></ruby>までに<mark class="bg-xp/60 rounded px-1 font-bold"><ruby>確認<rt>かくにん</rt></ruby></mark>を<ruby>願<rt>ねが</rt></ruby>いします
+                </p>
+              </div>
+            </div>
+            <p class="text-center text-xs text-muted font-bold mt-3">← Bấm để lật lại</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bảng tổng hợp -->
+  <div class="rounded-3xl border-2 border-muted/25 bg-white shadow-sm overflow-hidden mb-8">
+    <div class="px-5 py-4 bg-brand/10 border-b-2 border-brand/20">
+      <h3 class="text-lg font-extrabold text-ink flex items-center gap-2">
+        <span>🟩</span> Câu từ buổi họp xuất hiện ở đâu?
+      </h3>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead>
+          <tr class="text-xs font-extrabold text-muted uppercase border-b-2 border-muted/15">
+            <th class="px-5 py-3">Loại thẻ</th>
+            <th class="px-5 py-3">Vị trí câu họp 🟩</th>
+            <th class="px-5 py-3">Mục đích luyện</th>
+          </tr>
+        </thead>
+        <tbody class="font-bold text-ink">
+          <tr class="border-b-2 border-muted/10">
+            <td class="px-5 py-3">① Nhận diện</td>
+            <td class="px-5 py-3"><span class="px-2 py-1 rounded-lg bg-brand/15 text-brand-dark">Ngữ cảnh (mặt trước)</span></td>
+            <td class="px-5 py-3 text-ink/80">Đọc hiểu</td>
+          </tr>
+          <tr class="border-b-2 border-muted/10">
+            <td class="px-5 py-3">② Cloze</td>
+            <td class="px-5 py-3"><span class="px-2 py-1 rounded-lg bg-brand/15 text-brand-dark">Mặt trước (câu khuyết)</span></td>
+            <td class="px-5 py-3 text-ink/80">Dùng từ trong ngữ cảnh</td>
+          </tr>
+          <tr>
+            <td class="px-5 py-3">③ Sản sinh</td>
+            <td class="px-5 py-3"><span class="px-2 py-1 rounded-lg bg-brand/15 text-brand-dark">Ví dụ (mặt sau)</span></td>
+            <td class="px-5 py-3 text-ink/80">Chủ động nhớ từ</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="flex flex-col sm:flex-row gap-3">
+    <button id="cardtypes-go-study" class="btn-3d bg-brand border-brand-dark text-white text-lg px-6 py-3 font-extrabold">
+      Bắt đầu luyện 3 loại thẻ →
+    </button>
+    <button id="cardtypes-go-library" class="btn-3d bg-white border-muted/30 text-ink text-lg px-6 py-3 font-extrabold">
+      Về thư viện
+    </button>
+  </div>
+
+</div>
+
+<script>(function(){
+  var root = document.querySelector('#view-cardtypes');
+  if(!root) return;
+
+  // Lật thẻ
+  root.querySelectorAll('.cardtypes-card').forEach(function(card){
+    card.addEventListener('click', function(){
+      var inner = card.querySelector('.cardtypes-inner');
+      if(!inner) return;
+      var flipped = card.getAttribute('data-flipped') === 'true';
+      flipped = !flipped;
+      card.setAttribute('data-flipped', flipped ? 'true' : 'false');
+      inner.style.transform = flipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
+    });
+  });
+
+  // Điều hướng
+  var goStudy = root.querySelector('#cardtypes-go-study');
+  if(goStudy) goStudy.addEventListener('click', function(){
+    if(typeof confetti === 'function'){
+      confetti({ particleCount: 80, spread: 70, origin: { y: 0.7 } });
+    }
+    if(typeof window.appShow === 'function') setTimeout(function(){ window.appShow('study'); }, 300);
+  });
+
+  var goLib = root.querySelector('#cardtypes-go-library');
+  if(goLib) goLib.addEventListener('click', function(){
+    if(typeof window.appShow === 'function') window.appShow('library');
+  });
+})();</script>
+</section>
+
+<section id="view-review" class="view" data-fullbleed="true">
+<div id="review-content" class="fixed inset-0 z-40 bg-white flex flex-col font-sans text-ink">
+
+  <!-- HEADER -->
+  <div class="flex items-center gap-3 sm:gap-5 px-4 sm:px-8 pt-5 pb-3 max-w-3xl mx-auto w-full">
+    <button onclick="window.appShow('dashboard')" aria-label="Đóng" class="text-muted hover:text-ink text-3xl font-extrabold leading-none transition-transform active:scale-90 shrink-0">×</button>
+
+    <!-- progress bar -->
+    <div class="flex-1 h-4 rounded-full bg-gray-200 overflow-hidden">
+      <div id="review-progress" class="h-full rounded-full bg-brand transition-all duration-500 ease-out" style="width:33%"></div>
+    </div>
+
+    <!-- stats -->
+    <div class="flex items-center gap-2 sm:gap-3 shrink-0 font-extrabold text-sm sm:text-base">
+      <span class="flex items-center gap-1">🔥<span>7</span></span>
+      <span class="flex items-center gap-1 text-xp">⭐<span id="review-xp">1240</span></span>
+      <span class="flex items-center gap-1 text-danger">❤️<span>5</span></span>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="flex-1 overflow-y-auto px-4 sm:px-8">
+    <div id="review-stage" class="max-w-2xl mx-auto w-full py-4 sm:py-8"></div>
+  </div>
+
+  <!-- FOOTER (feedback + action button) -->
+  <div id="review-footer" class="border-t-2 border-gray-100 transition-colors duration-300">
+    <div class="max-w-2xl mx-auto w-full px-4 sm:px-8 py-5">
+      <div id="review-feedback" class="hidden mb-4 flex items-center gap-3"></div>
+      <button id="review-action" disabled class="btn-3d w-full bg-gray-200 border-gray-300 text-muted text-lg sm:text-xl tracking-wide py-4 cursor-not-allowed">KIỂM TRA</button>
+    </div>
+  </div>
+
+</div>
+
+<script>(function(){
+  var root = document.querySelector('#view-review');
+  if(!root) return;
+
+  var stage      = root.querySelector('#review-stage');
+  var footer     = root.querySelector('#review-footer');
+  var feedback   = root.querySelector('#review-feedback');
+  var actionBtn  = root.querySelector('#review-action');
+  var progressEl = root.querySelector('#review-progress');
+  var xpEl       = root.querySelector('#review-xp');
+
+  // ----- DỮ LIỆU 3 THẺ (3 LOẠI) -----
+  var cards = [
+    {
+      type: 'recognition',
+      source: '💬 Từ buổi họp',
+      promptHtml:
+        '<p class="font-jp text-2xl sm:text-3xl leading-relaxed text-center">'+
+          '<ruby>明日<rt>あした</rt></ruby>までに'+
+          '<span class="text-info font-extrabold"><ruby>確認<rt>かくにん</rt></ruby></span>'+
+          'を<ruby>お願<rt>ねが</rt></ruby>いします</p>',
+      question: 'Từ tô màu nghĩa là gì?',
+      lang: '',
+      options: [
+        {t:'xác nhận', ok:true},
+        {t:'liên lạc', ok:false},
+        {t:'chuẩn bị', ok:false},
+        {t:'báo cáo',  ok:false}
+      ]
+    },
+    {
+      type: 'cloze',
+      source: '💬 Từ buổi họp',
+      promptHtml:
+        '<p class="font-jp text-2xl sm:text-3xl leading-relaxed text-center">'+
+          '<ruby>明日<rt>あした</rt></ruby>までに '+
+          '<span class="inline-block align-middle border-b-4 border-info border-dashed text-info font-extrabold px-6 mx-1">＿＿</span> '+
+          'を<ruby>お願<rt>ねが</rt></ruby>いします</p>',
+      question: 'Điền từ còn thiếu vào chỗ trống',
+      lang: 'font-jp',
+      options: [
+        {t:'確認', ok:true},
+        {t:'連絡', ok:false},
+        {t:'準備', ok:false},
+        {t:'報告', ok:false}
+      ]
+    },
+    {
+      type: 'production',
+      source: '✍️ Sản sinh',
+      promptHtml:
+        '<p class="text-2xl sm:text-3xl font-extrabold leading-relaxed text-center">'+
+          '“xác nhận / kiểm tra”</p>',
+      question: 'Từ này trong tiếng Nhật là gì?',
+      lang: 'font-jp',
+      options: [
+        {t:'確認', ok:true},
+        {t:'会議', ok:false},
+        {t:'資料', ok:false},
+        {t:'共有', ok:false}
+      ]
+    }
+  ];
+
+  var idx = 0;          // thẻ hiện tại
+  var selected = -1;    // đáp án đang chọn
+  var checked = false;  // đã bấm KIỂM TRA chưa
+  var lastOk = false;
+  var correctCount = 0; // số câu đúng (để tính độ chính xác)
+  var totalXp = 0;      // tổng XP kiếm được trong phiên
+
+  var TYPE_LABEL = {
+    recognition: { tag:'Nhận diện', color:'bg-info/10 text-info-dark' },
+    cloze:       { tag:'Điền câu',   color:'bg-xp/20 text-yellow-700' },
+    production:  { tag:'Sản sinh',  color:'bg-brand/10 text-brand-dark' }
+  };
+
+  function renderCard(){
+    selected = -1; checked = false; lastOk = false;
+    feedback.classList.add('hidden');
+    feedback.innerHTML = '';
+    footer.classList.remove('bg-brand/10','bg-danger/10');
+    setActionDisabled();
+
+    var c = cards[idx];
+    var tl = TYPE_LABEL[c.type];
+
+    var optsHtml = c.options.map(function(o,i){
+      return ''+
+        '<button data-i="'+i+'" class="review-opt group w-full text-left flex items-center gap-3 rounded-2xl border-2 border-gray-200 bg-white px-4 py-4 font-bold text-lg transition-all hover:bg-gray-50 active:scale-[0.98]">'+
+          '<span class="review-opt-key shrink-0 grid place-items-center w-7 h-7 rounded-lg border-2 border-gray-200 text-sm text-muted">'+(i+1)+'</span>'+
+          '<span class="'+(c.lang||'')+'">'+o.t+'</span>'+
+        '</button>';
+    }).join('');
+
+    stage.innerHTML =
+      '<div class="bounce-in">'+
+        '<div class="flex items-center justify-between mb-5">'+
+          '<span class="inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wide px-3 py-1 rounded-full '+tl.color+'">'+tl.tag+'</span>'+
+          '<span class="text-sm font-bold text-muted">'+c.source+'</span>'+
+        '</div>'+
+        '<h2 class="text-xl sm:text-2xl font-extrabold text-center mb-6">'+c.question+'</h2>'+
+        '<div class="rounded-3xl border-2 border-gray-100 bg-gray-50 px-5 py-8 sm:py-10 mb-7 min-h-[120px] flex items-center justify-center">'+c.promptHtml+'</div>'+
+        '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="review-options">'+optsHtml+'</div>'+
+      '</div>';
+
+    Array.prototype.forEach.call(stage.querySelectorAll('.review-opt'), function(btn){
+      btn.addEventListener('click', function(){ selectOption(parseInt(btn.dataset.i,10)); });
+    });
+  }
+
+  function selectOption(i){
+    if(checked) return;
+    selected = i;
+    Array.prototype.forEach.call(stage.querySelectorAll('.review-opt'), function(btn){
+      var on = parseInt(btn.dataset.i,10) === i;
+      btn.classList.toggle('border-info', on);
+      btn.classList.toggle('bg-info/5', on);
+      btn.classList.toggle('border-gray-200', !on);
+      var key = btn.querySelector('.review-opt-key');
+      key.classList.toggle('border-info', on);
+      key.classList.toggle('text-info', on);
+      key.classList.toggle('border-gray-200', !on);
+      key.classList.toggle('text-muted', !on);
+    });
+    setActionEnabled();
+  }
+
+  function setActionDisabled(){
+    actionBtn.textContent = 'KIỂM TRA';
+    actionBtn.disabled = true;
+    actionBtn.classList.remove('hidden');
+    actionBtn.className = 'btn-3d w-full bg-gray-200 border-gray-300 text-muted text-lg sm:text-xl tracking-wide py-4 cursor-not-allowed';
+  }
+  function setActionEnabled(){
+    actionBtn.textContent = 'KIỂM TRA';
+    actionBtn.disabled = false;
+    actionBtn.className = 'btn-3d w-full bg-brand border-brand-dark text-white text-lg sm:text-xl tracking-wide py-4';
+  }
+  function setActionContinue(){
+    actionBtn.textContent = 'TIẾP TỤC';
+    actionBtn.disabled = false;
+    var col = lastOk ? 'bg-brand border-brand-dark' : 'bg-danger border-danger-dark';
+    actionBtn.className = 'btn-3d w-full '+col+' text-white text-lg sm:text-xl tracking-wide py-4';
+  }
+
+  function check(){
+    if(checked || selected < 0) return;
+    checked = true;
+    var c = cards[idx];
+    var correctIdx = -1;
+    c.options.forEach(function(o,i){ if(o.ok) correctIdx = i; });
+    lastOk = (selected === correctIdx);
+
+    // khoá & tô màu các đáp án
+    Array.prototype.forEach.call(stage.querySelectorAll('.review-opt'), function(btn){
+      var i = parseInt(btn.dataset.i,10);
+      btn.classList.add('pointer-events-none');
+      btn.classList.remove('border-info','bg-info/5','border-gray-200','hover:bg-gray-50');
+      var key = btn.querySelector('.review-opt-key');
+      if(key){ key.classList.remove('border-info','text-info','border-gray-200','text-muted'); }
+      if(i === correctIdx){
+        btn.classList.add('border-brand','bg-brand/10','text-brand-dark');
+      } else if(i === selected && !lastOk){
+        btn.classList.add('border-danger','bg-danger/10','text-danger','shake');
+      } else {
+        btn.classList.add('border-gray-200','opacity-60');
+      }
+    });
+
+    feedback.classList.remove('hidden');
+    if(lastOk){
+      correctCount++;
+      totalXp += 10;
+      footer.classList.add('bg-brand/10');
+      feedback.innerHTML =
+        '<span class="text-2xl">✓</span>'+
+        '<div class="font-extrabold text-brand-dark">Chính xác! <span class="text-xp">+10 XP</span></div>';
+      try{
+        confetti({particleCount:120, spread:70, origin:{y:0.7}, colors:['#58CC02','#FFC800','#1CB0F6']});
+      }catch(e){}
+      var cur = parseInt(xpEl.textContent.replace(/[^0-9]/g,''),10) || 0;
+      animateXp(cur, cur+10);
+    } else {
+      footer.classList.add('bg-danger/10');
+      var ans = c.options[correctIdx].t;
+      feedback.innerHTML =
+        '<span class="text-2xl">✕</span>'+
+        '<div class="font-extrabold text-danger">Chưa đúng — đáp án: '+
+          '<span class="'+(c.lang||'')+' underline decoration-2 underline-offset-2">'+ans+'</span>'+
+        '</div>';
+    }
+
+    // tăng progress: bước đều theo số thẻ (33 -> 66 -> 100)
+    var pct = Math.round(((idx+1)/cards.length)*100);
+    progressEl.style.width = pct + '%';
+
+    setActionContinue();
+  }
+
+  function animateXp(from, to){
+    var steps = to - from, i = 0;
+    if(steps <= 0){ xpEl.textContent = to; return; }
+    var t = setInterval(function(){
+      i++;
+      xpEl.textContent = from + i;
+      if(i >= steps) clearInterval(t);
+    }, 40);
+  }
+
+  function next(){
+    if(idx < cards.length - 1){
+      idx++;
+      renderCard();
+    } else {
+      finish();
+    }
+  }
+
+  function finish(){
+    feedback.classList.add('hidden');
+    footer.classList.remove('bg-brand/10','bg-danger/10');
+    actionBtn.classList.add('hidden');
+
+    var acc = Math.round((correctCount / cards.length) * 100);
+
+    stage.innerHTML =
+      '<div class="bounce-in text-center py-6">'+
+        '<div class="text-7xl mb-4">🎉</div>'+
+        '<h2 class="text-3xl font-extrabold mb-2">Hoàn thành! 🎉</h2>'+
+        '<p class="text-muted font-bold mb-8">Bạn đã ôn xong 3 thẻ hôm nay. Giỏi lắm, Minh!</p>'+
+        '<div class="grid grid-cols-2 gap-4 max-w-md mx-auto mb-8">'+
+          '<div class="rounded-2xl border-2 border-xp/40 bg-xp/10 py-5">'+
+            '<div class="text-xs font-extrabold uppercase tracking-wide text-yellow-700 mb-1">Tổng XP</div>'+
+            '<div class="text-2xl font-extrabold text-xp">⭐ +'+totalXp+'</div>'+
+          '</div>'+
+          '<div class="rounded-2xl border-2 border-brand/40 bg-brand/10 py-5">'+
+            '<div class="text-xs font-extrabold uppercase tracking-wide text-brand-dark mb-1">Độ chính xác</div>'+
+            '<div class="text-2xl font-extrabold text-brand-dark">'+acc+'%</div>'+
+          '</div>'+
+        '</div>'+
+        '<button id="review-home" class="btn-3d bg-brand border-brand-dark text-white text-lg tracking-wide py-4 px-10">Về trang chủ</button>'+
+      '</div>';
+
+    try{
+      confetti({particleCount:160, spread:90, origin:{y:0.6}, colors:['#58CC02','#FFC800','#1CB0F6','#FF4B4B']});
+      setTimeout(function(){
+        confetti({particleCount:120, spread:70, origin:{y:0.7}, colors:['#58CC02','#FFC800','#1CB0F6']});
+      }, 350);
+    }catch(e){}
+
+    var home = stage.querySelector('#review-home');
+    if(home) home.addEventListener('click', function(){ window.appShow('dashboard'); });
+  }
+
+  // nút hành động
+  actionBtn.addEventListener('click', function(){
+    if(actionBtn.disabled) return;
+    if(!checked) check();
+    else next();
+  });
+
+  // phím tắt — chỉ khi màn review đang hiển thị
+  function visible(){
+    return root.offsetParent !== null;
+  }
+  document.addEventListener('keydown', function(e){
+    if(!visible()) return;
+    if(e.key >= '1' && e.key <= '4'){
+      var n = parseInt(e.key,10) - 1;
+      var opts = stage.querySelectorAll('.review-opt');
+      if(opts[n] && !checked){ selectOption(n); e.preventDefault(); }
+    } else if(e.key === 'Enter'){
+      if(!actionBtn.disabled && !actionBtn.classList.contains('hidden')){
+        actionBtn.click(); e.preventDefault();
+      }
+    }
+  });
+
+  // khởi tạo
+  renderCard();
+})();</script>
+</section>
+
+<section id="view-settings" class="view" data-fullbleed="false">
+<div class="max-w-2xl w-full mx-auto px-4 pt-6 pb-28 font-sans text-ink">
+
+  <!-- ===== Tiêu đề màn ===== -->
+  <header class="flex items-center gap-4 mb-6">
+    <button onclick="window.appShow('dashboard')"
+            class="text-muted hover:text-ink text-3xl font-black leading-none transition-colors"
+            aria-label="Quay lại">←</button>
+    <div>
+      <h1 class="text-3xl font-extrabold text-ink leading-tight">Cài đặt</h1>
+      <p class="text-muted font-bold text-sm">Tùy chỉnh cách WorkLingo tạo và ôn thẻ cho bạn</p>
+    </div>
+    <span class="ml-auto text-4xl">⚙️</span>
+  </header>
+
+  <!-- ===== Nhóm: Loại thẻ ===== -->
+  <section class="mb-6">
+    <h2 class="text-xs font-extrabold uppercase tracking-widest text-muted mb-3 px-1">Loại thẻ</h2>
+
+    <div class="bg-white border-2 border-gray-200 rounded-3xl divide-y-2 divide-gray-100 overflow-hidden">
+
+      <!-- Nhận diện (BẬT) -->
+      <div class="flex items-start gap-4 p-5">
+        <div class="text-3xl leading-none mt-0.5">👀</div>
+        <div class="flex-1">
+          <p class="font-extrabold text-lg text-ink">Nhận diện</p>
+          <p class="text-muted font-bold text-sm leading-snug">
+            Hiện <span class="font-jp"><ruby>漢字<rt>かんじ</rt></ruby></span> + câu gốc, bạn nhớ cách đọc và nghĩa.
+          </p>
+        </div>
+        <button id="settings-toggle-recognition" data-on="1" data-kind="card" onclick="settings_toggle(this)"
+                role="switch" aria-checked="true" aria-label="Bật/tắt loại thẻ Nhận diện"
+                class="settings-switch shrink-0 mt-1 relative w-14 h-8 rounded-full bg-brand border-2 border-brand-dark transition-colors duration-200">
+          <span class="settings-knob absolute top-1/2 -translate-y-1/2 left-6 w-6 h-6 bg-white rounded-full shadow transition-all duration-200"></span>
+        </button>
+      </div>
+
+      <!-- Cloze (BẬT) -->
+      <div class="flex items-start gap-4 p-5">
+        <div class="text-3xl leading-none mt-0.5">✏️</div>
+        <div class="flex-1">
+          <p class="font-extrabold text-lg text-ink">Cloze <span class="text-muted font-bold text-sm">(điền câu)</span></p>
+          <p class="text-muted font-bold text-sm leading-snug">
+            Che từ trong câu (<span class="font-jp">＿＿</span>), bạn điền lại từ còn thiếu.
+          </p>
+        </div>
+        <button id="settings-toggle-cloze" data-on="1" data-kind="card" onclick="settings_toggle(this)"
+                role="switch" aria-checked="true" aria-label="Bật/tắt loại thẻ Cloze"
+                class="settings-switch shrink-0 mt-1 relative w-14 h-8 rounded-full bg-brand border-2 border-brand-dark transition-colors duration-200">
+          <span class="settings-knob absolute top-1/2 -translate-y-1/2 left-6 w-6 h-6 bg-white rounded-full shadow transition-all duration-200"></span>
+        </button>
+      </div>
+
+      <!-- Sản sinh (TẮT) -->
+      <div class="flex items-start gap-4 p-5">
+        <div class="text-3xl leading-none mt-0.5">🗣️</div>
+        <div class="flex-1">
+          <p class="font-extrabold text-lg text-ink">Sản sinh</p>
+          <p class="text-muted font-bold text-sm leading-snug">
+            Hiện nghĩa tiếng Việt, bạn tự nhớ ra từ tiếng Nhật.
+          </p>
+        </div>
+        <button id="settings-toggle-production" data-on="0" data-kind="card" onclick="settings_toggle(this)"
+                role="switch" aria-checked="false" aria-label="Bật/tắt loại thẻ Sản sinh"
+                class="settings-switch shrink-0 mt-1 relative w-14 h-8 rounded-full bg-gray-200 border-2 border-gray-300 transition-colors duration-200">
+          <span class="settings-knob absolute top-1/2 -translate-y-1/2 left-0.5 w-6 h-6 bg-white rounded-full shadow transition-all duration-200"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Cảnh báo vàng động -->
+    <div id="settings-warning"
+         class="mt-3 flex items-start gap-3 bg-xp/15 border-2 border-xp rounded-2xl px-4 py-3 bounce-in">
+      <span id="settings-warn-icon" class="text-xl leading-none">⚠️</span>
+      <p id="settings-warn-text" class="font-bold text-sm text-ink leading-snug">
+        Bật <span class="font-extrabold text-yellow-700">2</span> loại = mỗi từ tạo
+        <span class="font-extrabold text-yellow-700">2</span> thẻ ôn.
+      </p>
+    </div>
+  </section>
+
+  <!-- ===== Nhóm: Học ===== -->
+  <section class="mb-6">
+    <h2 class="text-xs font-extrabold uppercase tracking-widest text-muted mb-3 px-1">Học</h2>
+
+    <div class="bg-white border-2 border-gray-200 rounded-3xl divide-y-2 divide-gray-100 overflow-hidden">
+
+      <!-- Trình độ JLPT -->
+      <div class="flex items-center gap-4 p-5">
+        <div class="text-3xl leading-none">🎯</div>
+        <div class="flex-1">
+          <p class="font-extrabold text-lg text-ink">Trình độ JLPT</p>
+          <p class="text-muted font-bold text-sm leading-snug">Ưu tiên từ vựng phù hợp trình độ của bạn.</p>
+        </div>
+        <div class="relative shrink-0">
+          <select id="settings-jlpt" onchange="settings_jlptChange(this)"
+                  class="appearance-none font-extrabold text-info bg-info/10 border-2 border-info rounded-2xl pl-4 pr-9 py-2 cursor-pointer focus:outline-none">
+            <option value="N5">N5</option>
+            <option value="N4" selected>N4</option>
+            <option value="N3">N3</option>
+            <option value="N2">N2</option>
+            <option value="N1">N1</option>
+          </select>
+          <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-info font-black text-xs">▼</span>
+        </div>
+      </div>
+
+      <!-- Âm thanh (BẬT) -->
+      <div class="flex items-center gap-4 p-5">
+        <div class="text-3xl leading-none">🔊</div>
+        <div class="flex-1">
+          <p class="font-extrabold text-lg text-ink">Âm thanh</p>
+          <p class="text-muted font-bold text-sm leading-snug">Phát âm thanh khi học và làm bài.</p>
+        </div>
+        <button id="settings-toggle-sound" data-on="1" onclick="settings_toggle(this)"
+                role="switch" aria-checked="true" aria-label="Bật/tắt âm thanh"
+                class="settings-switch shrink-0 relative w-14 h-8 rounded-full bg-brand border-2 border-brand-dark transition-colors duration-200">
+          <span class="settings-knob absolute top-1/2 -translate-y-1/2 left-6 w-6 h-6 bg-white rounded-full shadow transition-all duration-200"></span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Nhóm: Tài khoản ===== -->
+  <section class="mb-6">
+    <h2 class="text-xs font-extrabold uppercase tracking-widest text-muted mb-3 px-1">Tài khoản</h2>
+
+    <div class="bg-white border-2 border-gray-200 rounded-3xl divide-y-2 divide-gray-100 overflow-hidden">
+
+      <!-- Email -->
+      <div class="flex items-center gap-4 p-5">
+        <div class="w-12 h-12 shrink-0 rounded-2xl bg-brand/15 border-2 border-brand flex items-center justify-center text-2xl font-extrabold text-brand-dark">M</div>
+        <div class="flex-1 min-w-0">
+          <p class="font-extrabold text-lg text-ink leading-tight">Minh</p>
+          <p class="text-muted font-bold text-sm truncate">minh@worklingo.vn</p>
+        </div>
+        <span class="shrink-0 bg-brand/15 text-brand-dark font-extrabold text-xs px-3 py-1 rounded-full">N4</span>
+      </div>
+
+      <!-- Đăng xuất -->
+      <div class="p-5">
+        <button onclick="window.appShow('login')"
+                class="btn-3d w-full bg-white border-2 border-danger text-danger font-extrabold tracking-wide rounded-2xl py-3.5 text-base hover:bg-danger/5">
+          Đăng xuất
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Nhóm: Dữ liệu ===== -->
+  <section class="mb-6">
+    <h2 class="text-xs font-extrabold uppercase tracking-widest text-muted mb-3 px-1">Dữ liệu</h2>
+
+    <div class="bg-white border-2 border-gray-200 rounded-3xl p-5">
+      <button id="settings-export" onclick="settings_export()"
+              class="w-full flex items-center justify-center gap-2 bg-gray-100 border-2 border-gray-200 text-gray-400 font-extrabold rounded-2xl py-3.5 text-base cursor-not-allowed">
+        <span class="text-xl opacity-60">📤</span>
+        Xuất sang Anki
+        <span class="bg-gray-200 text-gray-500 text-xs font-extrabold px-2 py-0.5 rounded-full ml-1">sắp có</span>
+      </button>
+    </div>
+  </section>
+
+  <p class="text-center text-muted font-bold text-xs">WorkLingo · phiên bản demo</p>
+</div>
+
+<script>(function(){
+  var root = document.querySelector('#view-settings');
+  if (!root) return;
+
+  // Cập nhật cảnh báo vàng theo số loại thẻ đang bật
+  window.settings_updateWarning = function () {
+    var toggles = root.querySelectorAll('button[data-kind="card"]');
+    var count = 0;
+    toggles.forEach(function (b) { if (b.getAttribute('data-on') === '1') count++; });
+
+    var warn = root.querySelector('#settings-warning');
+    var icon = root.querySelector('#settings-warn-icon');
+    var text = root.querySelector('#settings-warn-text');
+    if (!warn || !icon || !text) return;
+
+    if (count === 0) {
+      warn.classList.remove('bg-xp/15', 'border-xp');
+      warn.classList.add('bg-danger/10', 'border-danger');
+      icon.textContent = '🚫';
+      text.innerHTML =
+        '<span class="font-extrabold text-danger">Chưa bật loại thẻ nào</span> — sẽ không có thẻ nào được tạo để ôn.';
+    } else {
+      warn.classList.add('bg-xp/15', 'border-xp');
+      warn.classList.remove('bg-danger/10', 'border-danger');
+      icon.textContent = '⚠️';
+      text.innerHTML =
+        'Bật <span class="font-extrabold text-yellow-700">' + count + '</span> loại = mỗi từ tạo ' +
+        '<span class="font-extrabold text-yellow-700">' + count + '</span> thẻ ôn.';
+    }
+    warn.classList.remove('bounce-in'); void warn.offsetWidth; warn.classList.add('bounce-in');
+  };
+
+  // Bật/tắt một switch
+  window.settings_toggle = function (btn) {
+    var on = btn.getAttribute('data-on') === '1';
+    on = !on;
+    btn.setAttribute('data-on', on ? '1' : '0');
+    btn.setAttribute('aria-checked', on ? 'true' : 'false');
+
+    var knob = btn.querySelector('.settings-knob');
+    if (on) {
+      btn.classList.remove('bg-gray-200', 'border-gray-300');
+      btn.classList.add('bg-brand', 'border-brand-dark');
+      if (knob) { knob.classList.remove('left-0.5'); knob.classList.add('left-6'); }
+    } else {
+      btn.classList.add('bg-gray-200', 'border-gray-300');
+      btn.classList.remove('bg-brand', 'border-brand-dark');
+      if (knob) { knob.classList.add('left-0.5'); knob.classList.remove('left-6'); }
+    }
+
+    // Chỉ các toggle loại thẻ ảnh hưởng cảnh báo
+    if (btn.getAttribute('data-kind') === 'card') {
+      window.settings_updateWarning();
+    }
+  };
+
+  // Đổi trình độ JLPT — cập nhật huy hiệu trên thẻ tài khoản
+  window.settings_jlptChange = function (sel) {
+    var badge = null;
+    root.querySelectorAll('span').forEach(function (s) { if (/^N[1-5]$/.test(s.textContent.trim())) badge = s; });
+    if (badge) badge.textContent = sel.value;
+  };
+
+  // Nút "sắp có" — không làm gì, chỉ rung nhẹ báo chưa khả dụng
+  window.settings_export = function () {
+    var b = root.querySelector('#settings-export');
+    if (!b) return;
+    b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake');
+  };
+
+  // Khởi tạo cảnh báo đúng trạng thái mặc định
+  window.settings_updateWarning();
+})();</script>
+</section>
+
+<section id="view-forgot" class="view" data-fullbleed="true">
+
+<div class="min-h-screen w-full flex items-center justify-center bg-[#F7F7F7] px-4 py-10">
+  <div class="w-full max-w-md bounce-in">
+    <div class="text-center mb-6">
+      <div class="text-6xl mb-2">🔑</div>
+      <h1 class="text-3xl font-extrabold text-ink">Quên mật khẩu</h1>
+      <p class="text-muted font-bold mt-2">Nhập email, chúng tôi sẽ gửi liên kết đặt lại mật khẩu.</p>
+    </div>
+    <div class="wl-card p-6 sm:p-8">
+      <label class="block text-sm font-bold text-muted mb-1 ml-1">Email</label>
+      <input type="email" class="wl-input mb-5" placeholder="ban@congty.vn" />
+      <button id="forgot-send" type="button" class="btn-3d btn-primary w-full text-lg uppercase tracking-wide">Gửi liên kết</button>
+      <div id="forgot-done" class="hidden mt-4 text-center text-brand-dark font-bold bg-brand/10 rounded-2xl p-3">✓ Đã gửi! Kiểm tra hộp thư của bạn.</div>
+    </div>
+    <p class="text-center mt-6"><a href="#" onclick="appShow('login');return false;" class="text-info font-extrabold">← Quay lại đăng nhập</a></p>
+  </div>
+</div>
+<script>(function(){var r=document.querySelector('#view-forgot');if(!r)return;var b=r.querySelector('#forgot-send');if(b)b.addEventListener('click',function(){var d=r.querySelector('#forgot-done');if(d)d.classList.remove('hidden');});})();</script>
+
+</section>
+
+<section id="view-changepass" class="view" data-fullbleed="false">
+
+<div class="max-w-xl mx-auto px-4 py-6">
+  <h1 class="text-3xl font-extrabold text-ink mb-1">Đổi mật khẩu</h1>
+  <p class="text-muted font-bold mb-6">Đặt mật khẩu mới cho tài khoản của bạn.</p>
+  <div class="wl-card p-6 space-y-4">
+    <div>
+      <label class="block text-sm font-bold text-muted mb-1 ml-1">Mật khẩu hiện tại</label>
+      <input id="cp-old" type="password" class="wl-input" placeholder="••••••••" />
+    </div>
+    <div>
+      <label class="block text-sm font-bold text-muted mb-1 ml-1">Mật khẩu mới</label>
+      <input id="cp-new" type="password" class="wl-input" placeholder="••••••••" />
+      <p class="text-xs text-muted font-bold mt-1 ml-1">Tối thiểu 8 ký tự</p>
+    </div>
+    <div>
+      <label class="block text-sm font-bold text-muted mb-1 ml-1">Xác nhận mật khẩu mới</label>
+      <input id="cp-confirm" type="password" class="wl-input" placeholder="••••••••" />
+    </div>
+    <div id="cp-msg" class="hidden text-sm font-bold rounded-xl p-3"></div>
+    <button id="cp-submit" type="button" class="btn-3d btn-primary w-full uppercase tracking-wide">Cập nhật mật khẩu</button>
+  </div>
+</div>
+<script>(function(){
+  var r=document.querySelector('#view-changepass'); if(!r) return;
+  var btn=r.querySelector('#cp-submit'), msg=r.querySelector('#cp-msg');
+  function show(ok,t){ msg.className='text-sm font-bold rounded-xl p-3 '+(ok?'bg-brand/10 text-brand-dark':'bg-danger/10 text-danger'); msg.textContent=t; }
+  if(btn) btn.addEventListener('click',function(){
+    var o=r.querySelector('#cp-old').value, n=r.querySelector('#cp-new').value, c=r.querySelector('#cp-confirm').value;
+    if(!o||!n||!c){ show(false,'Vui lòng điền đủ các ô.'); return; }
+    if(n.length<8){ show(false,'Mật khẩu mới phải từ 8 ký tự.'); return; }
+    if(n!==c){ show(false,'Xác nhận mật khẩu không khớp.'); return; }
+    show(true,'✓ Đã cập nhật mật khẩu!');
+  });
+})();</script>
+
+</section>
+
+<section id="view-admin" class="view" data-fullbleed="false">
+
+<div class="max-w-5xl mx-auto px-4 py-6">
+  <h1 class="text-3xl font-extrabold text-ink mb-1">🛡️ Quản trị</h1>
+  <p class="text-muted font-bold mb-6">Tổng quan hệ thống & quản lý người dùng.</p>
+
+  <!-- Thống kê -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+    <div class="wl-card p-4 text-center"><div class="text-3xl">👥</div><div class="text-2xl font-extrabold text-info mt-1">1.248</div><div class="text-xs font-bold text-muted">Người dùng</div></div>
+    <div class="wl-card p-4 text-center"><div class="text-3xl">📚</div><div class="text-2xl font-extrabold text-brand mt-1">5.392</div><div class="text-xs font-bold text-muted">Tài liệu</div></div>
+    <div class="wl-card p-4 text-center"><div class="text-3xl">🃏</div><div class="text-2xl font-extrabold text-ink mt-1">84.120</div><div class="text-xs font-bold text-muted">Thẻ đã tạo</div></div>
+    <div class="wl-card p-4 text-center"><div class="text-3xl">🤖</div><div class="text-2xl font-extrabold text-xp mt-1">12.940</div><div class="text-xs font-bold text-muted">Lượt AI / tháng</div></div>
+  </div>
+
+  <!-- Tab -->
+  <div class="flex gap-2 mb-4">
+    <button class="wl-chip wl-chip-on admin-tab" data-tab="users">Người dùng</button>
+    <button class="wl-chip admin-tab" data-tab="content">Nội dung</button>
+  </div>
+
+  <!-- Tab Người dùng -->
+  <div id="admin-users" class="wl-card overflow-hidden">
+    <div class="p-4 border-b-2 border-[#EEE]">
+      <input class="wl-input" placeholder="🔍 Tìm theo tên hoặc email..." />
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead class="bg-[#F7F7F7] text-muted text-xs font-extrabold uppercase">
+          <tr><th class="px-4 py-3">Người dùng</th><th class="px-4 py-3">Vai trò</th><th class="px-4 py-3">Streak</th><th class="px-4 py-3">Tham gia</th><th class="px-4 py-3">Trạng thái</th><th class="px-4 py-3 text-right">Hành động</th></tr>
+        </thead>
+        <tbody class="font-bold text-sm" id="admin-rows">
+          <tr class="border-t border-[#EEE]"><td class="px-4 py-3">Minh<br><span class="text-muted text-xs">minh@worklingo.vn</span></td><td class="px-4 py-3"><span class="wl-badge bg-info/15 text-info">Admin</span></td><td class="px-4 py-3">🔥 7</td><td class="px-4 py-3 text-muted">12/03/2026</td><td class="px-4 py-3"><span class="wl-badge bg-brand/15 text-brand-dark admin-status">Hoạt động</span></td><td class="px-4 py-3 text-right"><button class="btn-3d btn-neutral btn-sm admin-lock">Khoá</button></td></tr>
+          <tr class="border-t border-[#EEE]"><td class="px-4 py-3">Lan Nguyễn<br><span class="text-muted text-xs">lan@congty.vn</span></td><td class="px-4 py-3"><span class="wl-badge bg-gray-100 text-ink">Học viên</span></td><td class="px-4 py-3">🔥 23</td><td class="px-4 py-3 text-muted">05/01/2026</td><td class="px-4 py-3"><span class="wl-badge bg-brand/15 text-brand-dark admin-status">Hoạt động</span></td><td class="px-4 py-3 text-right"><button class="btn-3d btn-neutral btn-sm admin-lock">Khoá</button></td></tr>
+          <tr class="border-t border-[#EEE]"><td class="px-4 py-3">Tuấn Trần<br><span class="text-muted text-xs">tuan@congty.vn</span></td><td class="px-4 py-3"><span class="wl-badge bg-gray-100 text-ink">Học viên</span></td><td class="px-4 py-3">🔥 0</td><td class="px-4 py-3 text-muted">28/04/2026</td><td class="px-4 py-3"><span class="wl-badge bg-danger/15 text-danger admin-status">Đã khoá</span></td><td class="px-4 py-3 text-right"><button class="btn-3d btn-neutral btn-sm admin-lock">Mở khoá</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab Nội dung -->
+  <div id="admin-content" class="wl-card p-6 hidden">
+    <p class="font-bold text-ink mb-3">Tài liệu mới nhất trong hệ thống</p>
+    <ul class="space-y-2 font-bold text-sm">
+      <li class="flex justify-between border-b border-[#EEE] pb-2">💼 Họp team dev 30/05 <span class="text-muted">Minh · 4 câu</span></li>
+      <li class="flex justify-between border-b border-[#EEE] pb-2">🎬 日本語ニュース <span class="text-muted">Lan · 40 câu</span></li>
+      <li class="flex justify-between">💬 Chat khách hàng A <span class="text-muted">Tuấn · 18 câu</span></li>
+    </ul>
+  </div>
+</div>
+<script>(function(){
+  var r=document.querySelector('#view-admin'); if(!r) return;
+  // Tab
+  r.querySelectorAll('.admin-tab').forEach(function(t){
+    t.addEventListener('click',function(){
+      r.querySelectorAll('.admin-tab').forEach(function(x){x.classList.remove('wl-chip-on');});
+      t.classList.add('wl-chip-on');
+      var tab=t.getAttribute('data-tab');
+      r.querySelector('#admin-users').classList.toggle('hidden', tab!=='users');
+      r.querySelector('#admin-content').classList.toggle('hidden', tab!=='content');
+    });
+  });
+  // Khoá / mở khoá
+  r.querySelectorAll('.admin-lock').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var row=btn.closest('tr'); var st=row.querySelector('.admin-status');
+      var locked = btn.textContent.trim()==='Mở khoá';
+      if(locked){ btn.textContent='Khoá'; st.textContent='Hoạt động'; st.className='wl-badge bg-brand/15 text-brand-dark admin-status'; }
+      else { btn.textContent='Mở khoá'; st.textContent='Đã khoá'; st.className='wl-badge bg-danger/15 text-danger admin-status'; }
+    });
+  });
+})();</script>
+
+</section>
+  </main>
+</div>
+
+<script>
+  window.appShow = function (id) {
+    var views = document.querySelectorAll('.view');
+    views.forEach(function (v) { v.classList.remove('view-active'); });
+    var target = document.getElementById('view-' + id);
+    if (target) target.classList.add('view-active');
+
+    var fullbleed = target && target.getAttribute('data-fullbleed') === 'true';
+    var sidebar = document.getElementById('app-sidebar');
+    var mobilebar = document.getElementById('app-mobilebar');
+    var main = document.getElementById('app-main');
+    if (sidebar) sidebar.style.display = fullbleed ? 'none' : '';
+    if (mobilebar) mobilebar.style.display = fullbleed ? 'none' : '';
+
+    // active nav
+    document.querySelectorAll('[data-nav]').forEach(function (b) {
+      b.classList.toggle('nav-active', b.getAttribute('data-nav') === id);
+    });
+    window.scrollTo(0, 0);
+  };
+  // Link "Quên mật khẩu?" ở màn đăng nhập -> màn forgot
+  var fp = document.getElementById('login-forgot');
+  if (fp) fp.addEventListener('click', function (e) { e.preventDefault(); window.appShow('forgot'); });
+
+  // Bắt đầu ở màn đăng nhập
+  window.appShow('login');
+</script>
+</body>
+</html>
