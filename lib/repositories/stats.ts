@@ -115,3 +115,36 @@ export async function getDashboard(
     totalCards: totalRows[0]?.n ?? 0,
   };
 }
+
+/** Bảng xếp hạng XP (top N) — GĐ3 social. */
+export async function leaderboard(
+  limit = 10,
+): Promise<{ name: string | null; xp: number }[]> {
+  const { users } = await import("@/lib/db/schema");
+  const rows = await db
+    .select({ name: users.name, xp: userStats.xp })
+    .from(userStats)
+    .innerJoin(users, eq(users.id, userStats.userId))
+    .orderBy(sql`${userStats.xp} desc`)
+    .limit(limit);
+  return rows;
+}
+
+/** Heatmap: số review mỗi ngày trong `days` ngày gần nhất. */
+export async function reviewHeatmap(
+  userId: string,
+  days = 84,
+): Promise<{ day: string; count: number }[]> {
+  const { reviews, cards } = await import("@/lib/db/schema");
+  const since = new Date(Date.now() - days * 86400000);
+  const rows = await db
+    .select({
+      day: sql<string>`to_char(${reviews.reviewedAt}, 'YYYY-MM-DD')`,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(reviews)
+    .innerJoin(cards, eq(reviews.cardId, cards.id))
+    .where(and(eq(cards.userId, userId), sql`${reviews.reviewedAt} >= ${since.toISOString()}`))
+    .groupBy(sql`to_char(${reviews.reviewedAt}, 'YYYY-MM-DD')`);
+  return rows;
+}
