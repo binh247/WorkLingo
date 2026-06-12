@@ -1,7 +1,8 @@
 # WorkLingo
 
 Học tiếng Nhật từ chính nội dung công việc thật của bạn (chat, transcript họp,
-video) theo phương pháp immersion + sentence mining + SRS, trải nghiệm gamified.
+video) theo phương pháp immersion + sentence mining + SRS, trải nghiệm gamified
+kiểu Duolingo (tim ❤️, combo ⚡, XP, streak, âm thanh).
 
 > Tài liệu sản phẩm: [`docs/`](docs/) · Tầm nhìn/điểm vào: [PROJECT.md](PROJECT.md)
 > · Lộ trình GSD: [ROADMAP.md](ROADMAP.md) · Kế hoạch từng phase: [`.planning/`](.planning/)
@@ -10,27 +11,64 @@ video) theo phương pháp immersion + sentence mining + SRS, trải nghiệm ga
 
 Next.js 16 (App Router) · React 19 · TypeScript · Tailwind v4 + shadcn/ui ·
 Drizzle ORM + postgres.js · **PostgreSQL tự host** · Auth.js v5 · OpenAI (AI Ingest) ·
-ts-fsrs (SRS) · Motion. Cấu hình hệ thống lưu trong bảng `app_settings` (đọc qua `lib/config`).
+ts-fsrs (SRS) · Web Audio (hiệu ứng âm thanh tổng hợp, không cần asset).
+Cấu hình hệ thống lưu trong bảng `app_settings` (đọc qua `lib/config`).
 
-## Setup (chạy lần đầu)
+## Yêu cầu môi trường
+
+| Thành phần | Phiên bản | Ghi chú |
+|---|---|---|
+| Node.js | ≥ 20 | kèm npm |
+| Docker + Docker Compose | mới nhất | chạy PostgreSQL tự host |
+| PostgreSQL | 18 (qua Docker) | hoặc Postgres ≥ 16 có sẵn, tự trỏ `DATABASE_URL` |
+
+## Cài đặt & khởi động (lần đầu)
 
 ```bash
-# 1. Khởi động PostgreSQL tự host (Docker)
-docker compose up -d            # Postgres 18, cổng theo POSTGRES_PORT trong .env
-
-# 2. Cài dependency
+# 0. Lấy mã nguồn + cài dependency
+git clone https://github.com/binh247/WorkLingo.git
+cd WorkLingo
 npm install
 
-# 3. Tạo schema + dữ liệu cấu hình
-npm run db:migrate              # tạo 13 bảng
-npm run db:seed                 # seed 7 key app_settings (idempotent)
+# 1. Cấu hình môi trường
+cp .env.example .env
+# Bắt buộc điền:
+#   - POSTGRES_PASSWORD  (và sửa DATABASE_URL khớp user/pass/port)
+#   - AUTH_SECRET        (tạo bằng: openssl rand -base64 32)
+# Tuỳ tính năng: OPENAI_API_KEY (+ OPENAI_BASE_URL nếu dùng endpoint
+# OpenAI-compatible), AUTH_GOOGLE_ID/SECRET, SMTP_* (quên mật khẩu).
+# Dev nhanh: AUTH_DEV_LOGIN="true" để bật đăng nhập dev.
 
-# 4. Chạy dev
-npm run dev                     # http://localhost:3000
+# 2. Khởi động PostgreSQL (Docker)
+docker compose up -d          # container worklingo-postgres, cổng POSTGRES_PORT
+
+# 3. Tạo cấu trúc database — chọn MỘT trong hai cách:
+# (A) Nhanh — nạp thẳng file SQL đầy đủ (đã kèm sổ migration Drizzle):
+docker exec -i worklingo-postgres psql -U worklingo -d worklingo < deploy/schema.sql
+# (B) Chuẩn Drizzle — chạy lần lượt các migration:
+npm run db:migrate
+
+# 4. Seed dữ liệu khởi tạo
+npm run db:seed               # 7 key cấu hình app_settings (idempotent)
+npx tsx lib/db/seed-user.ts   # user dev: dev@worklingo.local / devpass123 (admin)
+
+# 5. Chạy
+npm run dev                   # http://localhost:3000
 ```
 
-Cấu hình môi trường: copy `.env.example` → `.env` rồi điền `DATABASE_URL`,
-`AUTH_SECRET`, (tuỳ phase) `OPENAI_API_KEY`, `AUTH_GOOGLE_ID/SECRET`.
+Đăng nhập lần đầu: dùng user dev ở bước 4 (cần `AUTH_DEV_LOGIN="true"` trong
+`.env`; provider này tự tắt ở production), hoặc Google OAuth nếu đã điền key.
+
+## Chuyển môi trường / triển khai
+
+- **Cấu trúc DB**: [`deploy/schema.sql`](deploy/schema.sql) là ảnh chụp đầy đủ
+  (13 bảng + enum + index + FK + sổ migration Drizzle) — nạp một phát là xong
+  trên database **rỗng**; về sau có migration mới chỉ cần `npm run db:migrate`.
+  Tái sinh file sau khi đổi schema: `npm run db:schema-sql`.
+- **Production**: `npm run build && npm run start`. Mẫu cấu hình trong
+  [`deploy/`](deploy/): `Caddyfile` (reverse proxy), `ecosystem.config.cjs`
+  (PM2), `backup-db.sh` (backup Postgres).
+- **Media upload** lưu ở `storage/` (gitignore) — nhớ mount/backup thư mục này.
 
 ## Scripts
 
@@ -40,19 +78,35 @@ Cấu hình môi trường: copy `.env.example` → `.env` rồi điền `DATABA
 | `npm run build` / `npm run start` | Build & chạy production |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run verify` | typecheck + build |
-| `npm run db:generate` | Sinh migration từ schema |
+| `npm run lint` | ESLint |
+| `npm run db:generate` | Sinh migration từ `lib/db/schema.ts` |
 | `npm run db:migrate` | Apply migration lên DB |
 | `npm run db:seed` | Seed `app_settings` (idempotent) |
-| `npm run db:studio` | Drizzle Studio |
+| `npm run db:schema-sql` | Tái sinh `deploy/schema.sql` từ DB đang chạy |
+| `npm run db:studio` | Drizzle Studio (GUI xem DB) |
+| `npx tsx lib/db/seed-user.ts` | Tạo user dev (dev@worklingo.local) |
 
 ## Cấu trúc
 
 ```
-app/            # App Router pages + api routes
-components/     # Button3D, ProgressBar, Card + ui/ (shadcn)
-lib/db/         # Drizzle schema + kết nối + seed
-lib/repositories/  # tầng trung gian (luôn lọc user_id)
-lib/config.ts   # đọc app_settings (cache + fallback)
+app/               # App Router: dashboard, study, review, library, cards,
+                   # stats, settings, admin + api/ (tts, ...)
+components/        # AppShell (nav), ReviewQuiz, Hearts, ComboMeter,
+                   # NavIcons (SVG tự vẽ), Button3D + ui/ (shadcn)
+lib/db/            # Drizzle schema + kết nối + seed
+lib/repositories/  # tầng truy cập dữ liệu (LUÔN lọc user_id)
+lib/config.ts      # đọc app_settings (cache + fallback)
+lib/sound.ts       # âm thanh Web Audio tổng hợp (đúng/sai/hoàn thành)
 lib/ai/ lib/tts/ lib/srs.ts lib/auth.ts
-drizzle/        # migration sinh bởi drizzle-kit
+drizzle/           # migration sinh bởi drizzle-kit
+deploy/            # schema.sql, Caddyfile, PM2, backup script
 ```
+
+## Sự cố thường gặp
+
+- **Lỗi kết nối DB**: kiểm tra container `docker ps`, `DATABASE_URL` khớp
+  `POSTGRES_*` trong `.env`, cổng không bị chiếm.
+- **Đăng nhập dev không hiện**: cần `AUTH_DEV_LOGIN="true"` và đã chạy
+  `seed-user.ts`; provider này không bao giờ bật ở production.
+- **AI Ingest lỗi**: kiểm tra `OPENAI_API_KEY`/`OPENAI_BASE_URL` và model
+  cấu hình trong trang Quản trị (bảng `app_settings`).

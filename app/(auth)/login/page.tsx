@@ -11,15 +11,39 @@ export default async function LoginPage() {
   );
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-4 py-12">
-      <header className="text-center">
-        <h1 className="text-3xl font-black text-brand">WorkLingo</h1>
-        <p className="mt-1 font-bold text-ink-muted">
-          Học tiếng Nhật từ công việc thật
-        </p>
-      </header>
-      <div className="wl-card p-6">
-        <AuthForm googleEnabled={googleEnabled} />
+    <main className="flex min-h-screen w-full flex-1 items-center justify-center bg-gradient-to-b from-[#E8F9DC] via-[#F7F7F7] to-[#E3F4FF] px-4 py-10">
+      <div className="bounce-in w-full max-w-md">
+        <div className="mb-8 text-center">
+          <div
+            className="mb-2 select-none text-7xl"
+            style={{ filter: "drop-shadow(0 6px 0 rgba(0,0,0,0.08))" }}
+          >
+            🦉
+          </div>
+          <h1 className="text-4xl font-black tracking-tight text-brand">
+            WorkLingo
+          </h1>
+          <p className="mt-2 font-bold text-ink">
+            Học tiếng Nhật từ chính công việc của bạn
+          </p>
+          <p className="font-jp mt-1 text-sm font-bold text-ink-muted">
+            <ruby>
+              仕事<rt>しごと</rt>
+            </ruby>
+            から
+            <ruby>
+              日本語<rt>にほんご</rt>
+            </ruby>
+            を
+            <ruby>
+              学<rt>まな</rt>
+            </ruby>
+            ぼう
+          </p>
+        </div>
+        <div className="wl-card p-6 sm:p-8">
+          <AuthForm googleEnabled={googleEnabled} />
+        </div>
       </div>
     </main>
   );

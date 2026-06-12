@@ -16,17 +16,21 @@ export default async function SettingsPage() {
   );
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-5 px-4 py-8">
-      <header>
-        <h1 className="text-2xl font-black text-ink">Cài đặt</h1>
-        <p className="mt-1 font-bold text-ink-muted">
-          Chọn loại thẻ tạo ra khi lưu từ, và bật/tắt âm thanh.
-        </p>
+    <main className="mx-auto w-full max-w-2xl flex-1 px-4 pb-16 pt-6">
+      <header className="mb-6 flex items-center gap-4">
+        <div className="flex-1">
+          <h1 className="text-3xl font-black leading-tight text-ink">Cài đặt</h1>
+          <p className="font-bold text-ink-muted">
+            Tùy chỉnh cách WorkLingo tạo và ôn thẻ cho bạn
+          </p>
+        </div>
+        <span className="text-4xl">⚙️</span>
       </header>
       <SettingsClient
         enabledCardTypes={settings.enabledCardTypes}
         soundEnabled={settings.soundEnabled}
         cardCounts={cardCounts}
+        email={user.email ?? ""}
       />
     </main>
   );

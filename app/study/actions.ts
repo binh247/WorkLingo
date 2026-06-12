@@ -4,7 +4,11 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/session";
 import { getEnabledCardTypes } from "@/lib/repositories/settings";
 import { upsertNote } from "@/lib/repositories/notes";
-import { createCardsForNote, type CardType } from "@/lib/repositories/cards";
+import {
+  createCardsForNote,
+  setSuspendedByTargetWord,
+  type CardType,
+} from "@/lib/repositories/cards";
 import { markKnown, markLearning } from "@/lib/repositories/userWords";
 import { createEmptyState } from "@/lib/srs";
 import { db } from "@/lib/db";
@@ -54,15 +58,26 @@ export async function saveWordAsCards(input: SaveWordInput): Promise<void> {
   const fsrsState = createEmptyState() as unknown as Record<string, unknown>;
   await createCardsForNote(user.id, note.id, types, fsrsState);
   await markLearning(user.id, input.lemma || input.surface);
+  // Nếu trước đó từng "đã biết" (thẻ bị ẩn) → bật lại để vào hàng đợi ôn.
+  await setSuspendedByTargetWord(user.id, input.surface, false);
 
   revalidatePath("/study");
+  revalidatePath("/review");
 }
 
-/** "Đã biết / Bỏ qua" → user_words=known, không tạo thẻ (QĐ-6). */
-export async function markWordKnown(lemma: string): Promise<void> {
+/**
+ * "Đã biết / Bỏ qua" → user_words=known (QĐ-6). Đồng thời ẩn (suspend) mọi thẻ
+ * của từ này khỏi hàng đợi ôn — giữ tiến độ, bật lại khi lưu lại.
+ */
+export async function markWordKnown(
+  lemma: string,
+  surface?: string,
+): Promise<void> {
   const user = await requireUser();
   await markKnown(user.id, lemma);
+  if (surface) await setSuspendedByTargetWord(user.id, surface, true);
   revalidatePath("/study");
+  revalidatePath("/review");
 }
 
 /** F7 (GĐ2): giải thích ngữ pháp câu bằng AI (on-demand, không lưu). */

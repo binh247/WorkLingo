@@ -14,7 +14,12 @@ export function SourceList({ sources }: { sources: Source[] }) {
   return (
     <section className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-black text-ink">Tài liệu của bạn</h2>
+        <div>
+          <h2 className="text-lg font-black text-ink">Tài liệu của bạn</h2>
+          <p className="text-xs font-bold text-ink-muted">
+            Bấm vào tài liệu để học &amp; tạo thẻ flashcard.
+          </p>
+        </div>
         <Link href="/import">
           <Button3D variant="primary" size="sm">
             + Thêm
@@ -39,9 +44,14 @@ export function SourceList({ sources }: { sources: Source[] }) {
                   {new Date(s.createdAt).toLocaleDateString("vi-VN")}
                 </div>
               </div>
-              <span className="wl-badge bg-info/15 text-info-dark">
-                {TYPE_LABEL[s.type] ?? s.type}
-              </span>
+              <div className="flex shrink-0 items-center gap-2">
+                <span className="wl-badge bg-info/15 text-info-dark">
+                  {TYPE_LABEL[s.type] ?? s.type}
+                </span>
+                <span className="text-sm font-extrabold text-brand-dark">
+                  Học →
+                </span>
+              </div>
             </Card>
           </Link>
         ))

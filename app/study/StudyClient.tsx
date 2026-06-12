@@ -64,10 +64,10 @@ export function StudyClient({
     setSelected(null);
   }
 
-  function onMarkKnown(lemma: string) {
+  function onMarkKnown(lemma: string, surface?: string) {
     setStatus(lemma, "known");
     startTransition(async () => {
-      await markWordKnown(lemma);
+      await markWordKnown(lemma, surface);
     });
     setSelected(null);
   }
@@ -105,7 +105,12 @@ export function StudyClient({
         enabledCount={enabledCount}
         saving={pending}
         onSaveAll={onSaveAll}
-        onToggleSkip={(lemma) => onMarkKnown(lemma)}
+        onToggleSkip={(lemma) =>
+          onMarkKnown(
+            lemma,
+            suggestions.find((s) => s.lemma === lemma)?.surface,
+          )
+        }
       />
 
       <div className="flex flex-col gap-3">
@@ -149,7 +154,10 @@ export function StudyClient({
           saving={pending}
           onSave={onSave}
           onMarkKnown={() =>
-            onMarkKnown(selected.token.lemma || selected.token.surface)
+            onMarkKnown(
+              selected.token.lemma || selected.token.surface,
+              selected.token.surface,
+            )
           }
           onClose={() => setSelected(null)}
         />

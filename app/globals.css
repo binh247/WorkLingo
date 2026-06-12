@@ -315,3 +315,223 @@ ruby rt {
     animation: none;
   }
 }
+
+/* ===================================================================== */
+/* Màn LESSON — hiệu ứng kiểu Duolingo: tim (hearts) + combo tia chớp      */
+/* ===================================================================== */
+
+/* --- Progress bar: vệt sáng nội (highlight) như Duolingo --- */
+.wl-progress-fill {
+  position: relative;
+}
+.wl-progress-fill::after {
+  content: "";
+  position: absolute;
+  inset: 3px 8px auto 8px;
+  height: 4px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+}
+
+/* --- Tim (hearts) --- */
+.heart-alive {
+  filter: drop-shadow(0 1px 2px rgba(255, 75, 75, 0.45));
+}
+/* Còn ít tim: đập nhẹ cảnh báo */
+.heart-low {
+  animation: heart-pulse 0.9s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes heart-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.16);
+  }
+}
+/* Mất 1 tim: phồng lên rồi vỡ tan */
+.heart-break {
+  animation: heart-break 0.6s cubic-bezier(0.3, 0, 0.2, 1) forwards;
+  transform-origin: center;
+}
+@keyframes heart-break {
+  0% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+  25% {
+    transform: scale(1.5) rotate(-12deg);
+  }
+  45% {
+    transform: scale(1.5) rotate(12deg);
+  }
+  100% {
+    transform: scale(0.15) rotate(0);
+    opacity: 0;
+  }
+}
+/* Mảnh vỡ bắn ra theo --sx/--sy */
+.heart-shard {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  background: #ff4b4b;
+  pointer-events: none;
+  animation: heart-shard 0.6s ease-out forwards;
+}
+@keyframes heart-shard {
+  0% {
+    transform: translate(-50%, -50%) scale(1) rotate(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--sx, 0), var(--sy, 0)) scale(0.3) rotate(140deg);
+    opacity: 0;
+  }
+}
+/* Cụm tim rung khi mất */
+.hearts-shake {
+  animation: shake 0.4s ease;
+}
+
+/* --- Combo: tia chớp leo thang --- */
+.combo-pop {
+  animation: combo-pop 0.32s cubic-bezier(0.2, 0.8, 0.3, 1.4);
+}
+@keyframes combo-pop {
+  0% {
+    transform: scale(0.5) translateY(8px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15) translateY(0);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+.combo-bump {
+  display: inline-block;
+  animation: combo-bump 0.35s ease;
+}
+@keyframes combo-bump {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+/* Tia chớp đánh xuống + lóe sáng */
+.combo-bolt {
+  display: inline-block;
+  animation: bolt-strike 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+@keyframes bolt-strike {
+  0% {
+    transform: translateY(-14px) scale(0.4) rotate(-15deg);
+    opacity: 0;
+    filter: drop-shadow(0 0 0 #fff);
+  }
+  35% {
+    transform: translateY(0) scale(1.45) rotate(8deg);
+    opacity: 1;
+    filter: drop-shadow(0 0 12px #ffe066) drop-shadow(0 0 4px #fff);
+  }
+  100% {
+    transform: translateY(0) scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+/* Lóe sáng nền sau combo */
+.combo-flash {
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(255, 200, 0, 0.9), transparent 70%);
+  animation: combo-flash 0.55s ease-out forwards;
+}
+@keyframes combo-flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  25% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}
+/* Combo cao: glow đập liên tục */
+.combo-hot {
+  animation: combo-hot 0.8s ease-in-out infinite;
+}
+/* Chip tier cao nhất mang CẢ HAI class — hai rule cùng set shorthand
+   `animation` nên phải gộp, nếu không .combo-hot (đứng sau) nuốt mất pop-in:
+   pop chạy trước, glow lặp nối tiếp sau khi pop xong. */
+.combo-pop.combo-hot {
+  animation:
+    combo-pop 0.32s cubic-bezier(0.2, 0.8, 0.3, 1.4),
+    combo-hot 0.8s ease-in-out 0.32s infinite;
+}
+@keyframes combo-hot {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 200, 0, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 18px 4px rgba(255, 200, 0, 0.65);
+  }
+}
+/* Lóe viền màn hình ở mốc combo lớn */
+.edge-flash {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  box-shadow: inset 0 0 90px 14px rgba(255, 200, 0, 0.55);
+  animation: edge-flash 0.6s ease-out forwards;
+}
+@keyframes edge-flash {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heart-low,
+  .heart-break,
+  .heart-shard,
+  .hearts-shake,
+  .combo-pop,
+  .combo-bump,
+  .combo-bolt,
+  .combo-flash,
+  .combo-hot,
+  .combo-pop.combo-hot, /* specificity 2 class — phải liệt kê riêng */
+  .edge-flash {
+    animation: none;
+  }
+  .heart-break,
+  .heart-shard,
+  .combo-flash,
+  .edge-flash {
+    opacity: 0;
+  }
+}

@@ -137,6 +137,41 @@ export async function createCardsForNote(
   return toCreate.length;
 }
 
+export type CardListItem = {
+  id: string;
+  type: CardType;
+  targetWord: string;
+  reading: string;
+  meaning: string;
+  due: string | null;
+  suspended: boolean;
+  createdAt: Date;
+};
+
+/** Liệt kê toàn bộ thẻ của user (kèm từ/nghĩa/ngày tới hạn) cho trang "Thẻ của tôi". */
+export async function listCardsWithNote(
+  userId: string,
+  limit = 500,
+): Promise<CardListItem[]> {
+  const rows = await db
+    .select({
+      id: cards.id,
+      type: cards.type,
+      targetWord: notes.targetWord,
+      reading: notes.reading,
+      meaning: notes.meaning,
+      due: sql<string | null>`(${cards.fsrsState} ->> 'due')`,
+      suspended: cards.suspended,
+      createdAt: cards.createdAt,
+    })
+    .from(cards)
+    .innerJoin(notes, eq(cards.noteId, notes.id))
+    .where(eq(cards.userId, userId))
+    .orderBy(sql`${cards.createdAt} DESC`)
+    .limit(limit);
+  return rows;
+}
+
 /** Đếm số card theo từng loại (cho trang /settings). */
 export async function countCardsByType(
   userId: string,
@@ -147,6 +182,28 @@ export async function countCardsByType(
     .where(eq(cards.userId, userId))
     .groupBy(cards.type);
   return new Map(rows.map((r) => [r.type, r.n]));
+}
+
+/**
+ * Suspend/khôi phục mọi thẻ của 1 từ (theo note.targetWord).
+ * Dùng khi đánh dấu "đã biết" (ẩn khỏi hàng đợi ôn, giữ tiến độ) hoặc lưu lại.
+ */
+export async function setSuspendedByTargetWord(
+  userId: string,
+  targetWord: string,
+  suspended: boolean,
+): Promise<number> {
+  const noteRows = await db
+    .select({ id: notes.id })
+    .from(notes)
+    .where(and(eq(notes.userId, userId), eq(notes.targetWord, targetWord)));
+  const ids = noteRows.map((r) => r.id);
+  if (ids.length === 0) return 0;
+  await db
+    .update(cards)
+    .set({ suspended })
+    .where(and(eq(cards.userId, userId), inArray(cards.noteId, ids)));
+  return ids.length;
 }
 
 /** Suspend/khôi phục toàn bộ card 1 loại (khi bật/tắt loại thẻ — docs/09 §5). */

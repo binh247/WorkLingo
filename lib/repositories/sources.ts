@@ -2,9 +2,9 @@
  * Repository: sources + sentences. Mọi truy vấn lọc user_id (docs/02-architecture §6).
  * UI/API không chạm Drizzle trực tiếp — gọi qua đây (chống lock-in).
  */
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { sentences, sources } from "@/lib/db/schema";
+import { cards, notes, sentences, sources } from "@/lib/db/schema";
 import type { Sentence, Source } from "@/lib/db/schema";
 import type { SentenceData } from "@/lib/ai";
 
@@ -14,12 +14,47 @@ export type NewSourceInput = {
   rawContent: string;
 };
 
+export type SourceWithStats = Source & {
+  sentenceCount: number;
+  cardCount: number;
+};
+
 export async function listSources(userId: string): Promise<Source[]> {
   return db
     .select()
     .from(sources)
     .where(eq(sources.userId, userId))
     .orderBy(sources.createdAt);
+}
+
+/**
+ * Danh sách tài liệu kèm số câu + số thẻ đã đào (cho Thư viện / Dashboard).
+ * Mới nhất lên đầu.
+ */
+export async function listSourcesWithStats(
+  userId: string,
+): Promise<SourceWithStats[]> {
+  const rows = await db
+    .select({
+      source: sources,
+      sentenceCount: sql<number>`count(distinct ${sentences.id})::int`,
+      cardCount: sql<number>`count(distinct ${cards.id})::int`,
+    })
+    .from(sources)
+    .leftJoin(sentences, eq(sentences.sourceId, sources.id))
+    .leftJoin(notes, eq(notes.sentenceId, sentences.id))
+    .leftJoin(
+      cards,
+      and(eq(cards.noteId, notes.id), eq(cards.userId, userId)),
+    )
+    .where(eq(sources.userId, userId))
+    .groupBy(sources.id)
+    .orderBy(desc(sources.createdAt));
+  return rows.map((r) => ({
+    ...r.source,
+    sentenceCount: r.sentenceCount,
+    cardCount: r.cardCount,
+  }));
 }
 
 export async function getSource(

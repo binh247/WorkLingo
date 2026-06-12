@@ -13,7 +13,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "tsx lib/db/seed.ts"
+    "db:seed": "tsx lib/db/seed.ts",
+    "db:schema-sql": "bash deploy/gen-schema-sql.sh"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.2",

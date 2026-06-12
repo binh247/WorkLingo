@@ -31,13 +31,22 @@ export function ReviewCard({
   item: ReviewItem;
   onRate: (rating: Rating) => void;
 }) {
+  // Parent render với key={cardId:idx} → remount mỗi lượt, state tự reset
+  // (kể cả khi thẻ Again quay lại với cùng cardId).
   const [revealed, setRevealed] = React.useState(false);
-
-  React.useEffect(() => setRevealed(false), [item.cardId]);
 
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (e.repeat) {
+        // Giữ phím không được chấm/lật liên tục; chặn cả native click lặp
+        // của Enter khi focus đang nằm trên một nút.
+        if (e.key === "Enter") e.preventDefault();
+        return;
+      }
+      const target = e.target instanceof HTMLElement ? e.target : null;
+      if (target?.closest("input, textarea, select")) return;
       if (!revealed && (e.key === " " || e.key === "Enter")) {
+        if (target?.closest("button, a")) return; // để control tự xử lý
         e.preventDefault();
         setRevealed(true);
       } else if (revealed && ["1", "2", "3", "4"].includes(e.key)) {
