@@ -94,16 +94,12 @@ async function ingestChunk(chunk: string): Promise<SentenceData[]> {
   );
 }
 
-/** Ingest toàn bộ text: chunk → gọi AI từng chunk → ghép theo thứ tự. */
+/** Ingest toàn bộ text: chunk → gọi AI các chunk SONG SONG → ghép theo thứ tự. */
 export async function ingest(rawText: string): Promise<SentenceData[]> {
   const size = await getConfig<number>("ingest_chunk_size");
   const chunks = chunkText(rawText, size);
-  const all: SentenceData[] = [];
-  for (const c of chunks) {
-    const sentences = await ingestChunk(c);
-    all.push(...sentences);
-  }
-  return all;
+  const results = await Promise.all(chunks.map((c) => ingestChunk(c)));
+  return results.flat();
 }
 
 /** Alias tương thích interface cũ (Phase 1). */

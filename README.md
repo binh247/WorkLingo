@@ -35,9 +35,9 @@ cp .env.example .env
 # Bắt buộc điền:
 #   - POSTGRES_PASSWORD  (và sửa DATABASE_URL khớp user/pass/port)
 #   - AUTH_SECRET        (tạo bằng: openssl rand -base64 32)
-# Tuỳ tính năng: OPENAI_API_KEY (+ OPENAI_BASE_URL nếu dùng endpoint
-# OpenAI-compatible), AUTH_GOOGLE_ID/SECRET, SMTP_* (quên mật khẩu).
-# Dev nhanh: AUTH_DEV_LOGIN="true" để bật đăng nhập dev.
+# Tuỳ chọn: AUTH_GOOGLE_ID/SECRET (Google OAuth).
+# OpenAI (API key/endpoint/model) + SMTP cấu hình SAU trong trang
+# Quản trị /admin (bảng app_settings), không nằm trong .env.
 
 # 2. Khởi động PostgreSQL (Docker)
 docker compose up -d          # container worklingo-postgres, cổng POSTGRES_PORT
@@ -56,8 +56,8 @@ npx tsx lib/db/seed-user.ts   # user dev: dev@worklingo.local / devpass123 (admi
 npm run dev                   # http://localhost:3000
 ```
 
-Đăng nhập lần đầu: dùng user dev ở bước 4 (cần `AUTH_DEV_LOGIN="true"` trong
-`.env`; provider này tự tắt ở production), hoặc Google OAuth nếu đã điền key.
+Đăng nhập lần đầu: dùng user dev ở bước 4 (email + mật khẩu), hoặc Google OAuth
+nếu đã điền key.
 
 ## Chuyển môi trường / triển khai
 
@@ -106,7 +106,7 @@ deploy/            # schema.sql, Caddyfile, PM2, backup script
 
 - **Lỗi kết nối DB**: kiểm tra container `docker ps`, `DATABASE_URL` khớp
   `POSTGRES_*` trong `.env`, cổng không bị chiếm.
-- **Đăng nhập dev không hiện**: cần `AUTH_DEV_LOGIN="true"` và đã chạy
-  `seed-user.ts`; provider này không bao giờ bật ở production.
-- **AI Ingest lỗi**: kiểm tra `OPENAI_API_KEY`/`OPENAI_BASE_URL` và model
-  cấu hình trong trang Quản trị (bảng `app_settings`).
+- **Đăng nhập user dev không được**: cần chạy `npx tsx lib/db/seed-user.ts`
+  trước (tạo user dev@worklingo.local / devpass123).
+- **AI Ingest lỗi**: kiểm tra `openai_api_key`/`openai_base_url`/`openai_model`
+  trong trang Quản trị (bảng `app_settings`).

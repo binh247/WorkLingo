@@ -1,9 +1,9 @@
 /**
- * Cài đặt AIProvider bằng OpenAI (gpt-4o). Chỉ file này import SDK openai.
- * Model đọc từ app_settings (key openai_model) qua lib/config; key từ env.
+ * Cài đặt AIProvider bằng OpenAI (gpt-4o).
+ * Model + API key + base URL đều đọc từ app_settings qua lib/config.
  */
-import OpenAI from "openai";
 import { getConfig } from "@/lib/config";
+import { getOpenAIClient } from "./client";
 import type { AIProvider, CompleteOptions } from "./index";
 
 /** Một số endpoint OpenAI-compatible bọc JSON trong ```json ... ``` — gỡ ra. */
@@ -18,22 +18,11 @@ function stripFences(s: string): string {
   return t;
 }
 
-let _client: OpenAI | null = null;
-function client(): OpenAI {
-  if (!_client) {
-    _client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-      // Cho phép trỏ tới endpoint OpenAI-compatible (tự host / proxy).
-      baseURL: process.env.OPENAI_BASE_URL || undefined,
-    });
-  }
-  return _client;
-}
-
 export class OpenAIProvider implements AIProvider {
   async complete<T = unknown>(opts: CompleteOptions): Promise<T> {
     const model = await getConfig<string>("openai_model");
-    const res = await client().chat.completions.create({
+    const client = await getOpenAIClient();
+    const res = await client.chat.completions.create({
       model,
       temperature: opts.temperature ?? 0.2,
       messages: [
