@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { AuthForm } from "./AuthForm";
@@ -14,15 +15,15 @@ export default async function LoginPage() {
     <main className="flex min-h-screen w-full flex-1 items-center justify-center bg-gradient-to-b from-[#E8F9DC] via-[#F7F7F7] to-[#E3F4FF] px-4 py-10">
       <div className="bounce-in w-full max-w-md">
         <div className="mb-8 text-center">
-          <div
-            className="mb-2 select-none text-7xl"
+          <Image
+            src="/logo.png"
+            alt="Bloóm"
+            width={130}
+            height={143}
+            priority
+            className="mx-auto"
             style={{ filter: "drop-shadow(0 6px 0 rgba(0,0,0,0.08))" }}
-          >
-            🦉
-          </div>
-          <h1 className="text-4xl font-black tracking-tight text-brand">
-            WorkLingo
-          </h1>
+          />
           <p className="mt-2 font-bold text-ink">
             Học tiếng Nhật từ chính công việc của bạn
           </p>

@@ -1,9 +1,9 @@
-# WorkLingo — Roadmap (ánh xạ GSD Phase ↔ Feature)
+# Bloóm — Roadmap (ánh xạ GSD Phase ↔ Feature)
 
 > **Nguồn sự thật:** [docs/06-roadmap.md](docs/06-roadmap.md),
 > [docs/04-features.md](docs/04-features.md). Điểm vào: [PROJECT.md](PROJECT.md).
 >
-> GSD lập kế hoạch theo **số phase** (`plan-phase 1`, `2`...). Docs WorkLingo đánh
+> GSD lập kế hoạch theo **số phase** (`plan-phase 1`, `2`...). Docs Bloóm đánh
 > số theo **feature** (F1–F8) và **giai đoạn** ([MVP], [GĐ2], [GĐ3]). Hai hệ này
 > KHÔNG tự khớp — bảng dưới là ánh xạ chính thức. Mỗi khi xong một phase, đổi
 > `⬜ chưa làm` → `✅ done`.

@@ -1,7 +1,7 @@
 # 09 — Các loại flashcard
 
 > Một **từ** đào ra có thể sinh **nhiều loại thẻ**, mỗi loại luyện một kỹ năng và
-> có lịch ôn SRS riêng. Điểm đặc trưng WorkLingo: **mọi loại đều hiển thị lại câu
+> có lịch ôn SRS riêng. Điểm đặc trưng Bloóm: **mọi loại đều hiển thị lại câu
 > gốc từ buổi họp/nội dung bạn upload**.
 
 ## 1. Khái niệm: note vs card (chuẩn SRS)

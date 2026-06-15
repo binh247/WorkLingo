@@ -150,6 +150,36 @@ export async function setSentenceSkipped(
   return true;
 }
 
+/**
+ * Xóa CỨNG 1 câu — kiểm quyền qua source.user_id = userId.
+ * Cascade (schema) tự xóa note/card/review sinh ra từ câu này.
+ */
+export async function deleteSentence(
+  sentenceId: string,
+  userId: string,
+): Promise<boolean> {
+  const owned = await sentenceBelongsToUser(sentenceId, userId);
+  if (!owned) return false;
+  await db.delete(sentences).where(eq(sentences.id, sentenceId));
+  return true;
+}
+
+/**
+ * Xóa CỨNG cả bộ tài liệu của ĐÚNG user.
+ * Cascade (schema) tự xóa sentences → notes → cards → reviews.
+ * Trả false nếu source không tồn tại hoặc không thuộc user.
+ */
+export async function deleteSource(
+  sourceId: string,
+  userId: string,
+): Promise<boolean> {
+  const res = await db
+    .delete(sources)
+    .where(and(eq(sources.id, sourceId), eq(sources.userId, userId)))
+    .returning({ id: sources.id });
+  return res.length > 0;
+}
+
 async function sentenceBelongsToUser(
   sentenceId: string,
   userId: string,

@@ -1,6 +1,6 @@
 # GSD Phase 1 — Framework / Nền tảng
 
-> Tài liệu kế hoạch GSD cho Phase 1 dự án **WorkLingo**. Bám sát:
+> Tài liệu kế hoạch GSD cho Phase 1 dự án **Bloóm**. Bám sát:
 > [02-architecture.md](../docs/02-architecture.md),
 > [03-data-model.md](../docs/03-data-model.md),
 > [05-design-system.md](../docs/05-design-system.md),
@@ -199,8 +199,8 @@ Chưa nối repository/reviews (việc đó ở Sprint 4). Type `Rating` map 1=A
 <task type="auto">
   <name>Khởi tạo Next.js 15 + TS + Tailwind</name>
   <files>package.json, tsconfig.json, next.config.ts, app/layout.tsx, app/page.tsx, app/globals.css, postcss.config.mjs, .gitignore</files>
-  <action>Chạy `npx create-next-app@latest` tại thư mục gốc /Users/ongbinhit/working/source/WorkLingo với lựa chọn: TypeScript, App Router, Tailwind CSS, ESLint, src dir = NO (dùng app/ ở gốc theo 02-architecture §4), import alias `@/*`. Vì thư mục đã có file (.env, docs, mockups...), khởi tạo vào thư mục tạm rồi copy các file scaffold (app/, package.json, tsconfig.json, next.config, postcss, globals.css) về gốc, KHÔNG đè .env/.env.example/docker-compose.yml/docs/mockups/.planning. Cập nhật .gitignore thêm node_modules, .next, .env. app/page.tsx tạm render một heading "WorkLingo" để xác minh chạy.</action>
-  <verify>npm install && npm run dev → mở http://localhost:3000 thấy trang "WorkLingo"; npm run build chạy xanh.</verify>
+  <action>Chạy `npx create-next-app@latest` tại thư mục gốc /Users/ongbinhit/working/source/Bloóm với lựa chọn: TypeScript, App Router, Tailwind CSS, ESLint, src dir = NO (dùng app/ ở gốc theo 02-architecture §4), import alias `@/*`. Vì thư mục đã có file (.env, docs, mockups...), khởi tạo vào thư mục tạm rồi copy các file scaffold (app/, package.json, tsconfig.json, next.config, postcss, globals.css) về gốc, KHÔNG đè .env/.env.example/docker-compose.yml/docs/mockups/.planning. Cập nhật .gitignore thêm node_modules, .next, .env. app/page.tsx tạm render một heading "Bloóm" để xác minh chạy.</action>
+  <verify>npm install && npm run dev → mở http://localhost:3000 thấy trang "Bloóm"; npm run build chạy xanh.</verify>
   <done>Có package.json với Next 15 + React + TS; `npm run build` thành công; trang chủ render được; .env không bị ghi đè.</done>
 </task>
 
@@ -272,7 +272,7 @@ Chưa nối repository/reviews (việc đó ở Sprint 4). Type `Rating` map 1=A
   <name>Schema bảng app_settings + sinh & apply migration tổng</name>
   <files>lib/db/schema.ts, drizzle/ (migration sinh ra)</files>
   <action>Thêm vào schema.ts: pgEnum settingType ['string','number','bool','json']. Bảng app_settings: key text PK, value jsonb, type settingType, description text nullable, updatedAt timestamptz default now(), updatedBy uuid FK→users nullable. Sau khi có TẤT CẢ bảng, chạy `npm run db:generate` để sinh migration tổng trong drizzle/, rồi `npm run db:migrate` apply lên Postgres (docker compose phải đang chạy).</action>
-  <verify>docker compose up -d; npm run db:migrate chạy không lỗi; `docker exec worklingo-postgres psql -U worklingo -d worklingo -c "\dt"` liệt kê đủ 13 bảng (users, accounts, sessions, verification_tokens, sources, sentences, notes, cards, reviews, user_words, user_stats, user_settings, app_settings).</verify>
+  <verify>docker compose up -d; npm run db:migrate chạy không lỗi; `docker exec bloom-postgres psql -U bloom -d bloom -c "\dt"` liệt kê đủ 13 bảng (users, accounts, sessions, verification_tokens, sources, sentences, notes, cards, reviews, user_words, user_stats, user_settings, app_settings).</verify>
   <done>Thư mục drizzle/ có file migration; mọi bảng + enum + index đã tạo trong DB; migrate idempotent.</done>
 </task>
 
@@ -343,7 +343,7 @@ Chưa nối repository/reviews (việc đó ở Sprint 4). Type `Rating` map 1=A
 <task type="auto">
   <name>Trang chủ nền tảng + smoke test toàn bộ skeleton</name>
   <files>app/page.tsx, README.md (mục Setup), package.json (script "verify")</files>
-  <action>Cập nhật app/page.tsx thành trang nền tảng đơn giản kiểu Duolingo: dùng Card + Button3D + ProgressBar để chứng minh theme hoạt động (heading WorkLingo, 1 ProgressBar demo, vài nút biến thể màu). Thêm mục Setup vào README.md: docker compose up -d → npm install → npm run db:migrate → npm run db:seed → npm run dev. (Tùy chọn) thêm script npm "verify": chạy tsc --noEmit + next build. KHÔNG thêm logic nghiệp vụ.</action>
+  <action>Cập nhật app/page.tsx thành trang nền tảng đơn giản kiểu Duolingo: dùng Card + Button3D + ProgressBar để chứng minh theme hoạt động (heading Bloóm, 1 ProgressBar demo, vài nút biến thể màu). Thêm mục Setup vào README.md: docker compose up -d → npm install → npm run db:migrate → npm run db:seed → npm run dev. (Tùy chọn) thêm script npm "verify": chạy tsc --noEmit + next build. KHÔNG thêm logic nghiệp vụ.</action>
   <verify>docker compose up -d && npm install && npm run db:migrate && npm run db:seed && npm run build; npm run dev → / hiển thị theme Duolingo (nút 3D, ProgressBar animate, Card); npx tsc --noEmit sạch.</verify>
   <done>Trang / render theme; toàn bộ pipeline setup chạy từ đầu đến cuối không lỗi; build + type-check xanh.</done>
 </task>

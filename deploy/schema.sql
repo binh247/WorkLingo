@@ -1,15 +1,15 @@
 -- =====================================================================
--- WorkLingo — schema.sql (cấu trúc database đầy đủ)
+-- Bloóm — schema.sql (cấu trúc database đầy đủ)
 -- Sinh từ: pg_dump --schema-only + sổ migration Drizzle
 --
 -- CÁCH DÙNG (môi trường mới, database RỖNG):
 --   1) docker compose up -d        (hoặc Postgres có sẵn)
 --   2) Tạo DB rỗng nếu chưa có:
---        createdb -U worklingo worklingo
+--        createdb -U bloom bloom
 --   3) Nạp schema:
---        psql -U worklingo -d worklingo -f deploy/schema.sql
---      (qua docker: docker exec -i worklingo-postgres \
---         psql -U worklingo -d worklingo < deploy/schema.sql)
+--        psql -U bloom -d bloom -f deploy/schema.sql
+--      (qua docker: docker exec -i bloom-postgres \
+--         psql -U bloom -d bloom < deploy/schema.sql)
 --   4) Seed cấu hình mặc định + user dev:
 --        npm run db:seed && npx tsx lib/db/seed-user.ts
 --
@@ -631,7 +631,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Data for Name: __drizzle_migrations; Type: TABLE DATA; Schema: drizzle; Owner: worklingo
+-- Data for Name: __drizzle_migrations; Type: TABLE DATA; Schema: drizzle; Owner: bloom
 --
 
 INSERT INTO drizzle.__drizzle_migrations VALUES (1, '739113e2b79692a6b35ce2fab705738d3f169daea01d49fce5369ae0ba1e71b4', 1780579957527);
@@ -639,7 +639,7 @@ INSERT INTO drizzle.__drizzle_migrations VALUES (2, '71eae2d2d64943937a8ef56f2f3
 
 
 --
--- Name: __drizzle_migrations_id_seq; Type: SEQUENCE SET; Schema: drizzle; Owner: worklingo
+-- Name: __drizzle_migrations_id_seq; Type: SEQUENCE SET; Schema: drizzle; Owner: bloom
 --
 
 SELECT pg_catalog.setval('drizzle.__drizzle_migrations_id_seq', 2, true);

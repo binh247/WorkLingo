@@ -6,7 +6,11 @@ import { Button3D } from "@/components/Button3D";
 import { SentenceView } from "@/components/SentenceView";
 import { cn } from "@/lib/utils";
 import type { Sentence } from "@/lib/db/schema";
-import { toggleSkipAction, updateSentenceTextAction } from "./actions";
+import {
+  deleteSentenceAction,
+  toggleSkipAction,
+  updateSentenceTextAction,
+} from "./actions";
 
 export function ReviewList({
   sourceId,
@@ -62,6 +66,11 @@ function SentenceRow({
     const next = !skipped;
     setSkipped(next);
     startTransition(() => toggleSkipAction(sourceId, sentence.id, next));
+  }
+
+  function remove() {
+    if (!window.confirm("Xóa hẳn câu này? Không khôi phục được.")) return;
+    startTransition(() => deleteSentenceAction(sourceId, sentence.id));
   }
 
   return (
@@ -122,6 +131,14 @@ function SentenceRow({
             onClick={toggleSkip}
           >
             {skipped ? "Khôi phục" : "Bỏ câu rác"}
+          </Button3D>
+          <Button3D
+            variant="danger"
+            size="sm"
+            disabled={pending}
+            onClick={remove}
+          >
+            🗑 Xóa
           </Button3D>
         </div>
       )}

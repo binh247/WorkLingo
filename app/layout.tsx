@@ -20,7 +20,7 @@ const notoJP = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
-  title: "WorkLingo — Học tiếng Nhật từ công việc thật",
+  title: "Bloóm — Học tiếng Nhật từ công việc thật",
   description:
     "Học tiếng Nhật từ chính nội dung công việc của bạn: chat, transcript họp, video — immersion + sentence mining + SRS.",
 };

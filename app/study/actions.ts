@@ -10,6 +10,7 @@ import {
   type CardType,
 } from "@/lib/repositories/cards";
 import { markKnown, markLearning } from "@/lib/repositories/userWords";
+import { deleteSentence } from "@/lib/repositories/sources";
 import { createEmptyState } from "@/lib/srs";
 import { db } from "@/lib/db";
 import { sentences } from "@/lib/db/schema";
@@ -78,6 +79,16 @@ export async function markWordKnown(
   if (surface) await setSuspendedByTargetWord(user.id, surface, true);
   revalidatePath("/study");
   revalidatePath("/review");
+}
+
+/** Xóa CỨNG 1 câu rác ngay trên màn học (cascade xóa note/card của câu đó). */
+export async function deleteSentenceAction(sentenceId: string): Promise<void> {
+  const user = await requireUser();
+  const ok = await deleteSentence(sentenceId, user.id);
+  if (!ok) throw new Error("Không có quyền xóa câu này");
+  revalidatePath("/study");
+  revalidatePath("/review");
+  revalidatePath("/library");
 }
 
 /** F7 (GĐ2): giải thích ngữ pháp câu bằng AI (on-demand, không lưu). */

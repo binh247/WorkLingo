@@ -14,7 +14,7 @@
 
 ## Mục tiêu
 
-Mở rộng WorkLingo từ MVP sang trải nghiệm "gây nghiện" và mang đi được, gồm 4 nhóm:
+Mở rộng Bloóm từ MVP sang trải nghiệm "gây nghiện" và mang đi được, gồm 4 nhóm:
 
 1. **Thống kê chi tiết + heatmap** — trang `/stats`: heatmap kiểu GitHub (số lượt ôn
    mỗi ngày trong 12 tháng), biểu đồ XP/thẻ ôn theo ngày, phân bố `reviews.rating`
@@ -110,7 +110,7 @@ viết lại F1–F6.
   - `reading` → mặt trước: kanji `target_word`; mặt sau: `reading`.
   - Furigana xuất dạng ruby HTML (`<ruby>漢字<rt>かんじ</rt></ruby>`) từ `notes.reading`/tokens.
   - Mọi card mang **câu gốc** (qua `notes.sentence_id → sentences.text`) — điểm đặc trưng
-    WorkLingo (bản đồ dự án: "mọi loại thẻ đều hiển thị lại đúng câu gốc").
+    Bloóm (bản đồ dự án: "mọi loại thẻ đều hiển thị lại đúng câu gốc").
 - **Phân quyền:** API export **chỉ xuất thẻ của `currentUser`** — repository lọc `user_id`.
 - **Lý do:** `.apkg` là format thật người dùng Anki cần; tách ánh xạ vào `lib/export/anki.ts`
   để dễ test và đổi format.
@@ -283,7 +283,7 @@ viết lại F1–F6.
 <task type="auto">
   <name>API export Anki .apkg (có fallback TSV)</name>
   <files>app/api/export/anki/route.ts, lib/repositories/cards.ts, .env.example, package.json</files>
-  <action>Tạo app/api/export/anki/route.ts (GET, server): lấy currentUser từ lib/auth (401 nếu chưa đăng nhập). Thêm vào lib/repositories/cards.ts hàm getCardsForExport(userId) trả cards + note + sentence text (lọc where user_id=userId, bỏ suspended nếu muốn). Gọi lib/export/anki.buildAnkiDeck → sinh .apkg bằng thư viện Node sinh apkg (cài, vd anki-apkg-export hoặc tương đương trong package.json). Stream file .apkg về (Content-Type application/octet-stream, filename worklingo-YYYYMMDD.apkg). NẾU thư viện apkg không khả dụng → fallback xuất TSV .txt (cột: front, back, tags) import-được-vào-Anki. Tên deck "WorkLingo".</action>
+  <action>Tạo app/api/export/anki/route.ts (GET, server): lấy currentUser từ lib/auth (401 nếu chưa đăng nhập). Thêm vào lib/repositories/cards.ts hàm getCardsForExport(userId) trả cards + note + sentence text (lọc where user_id=userId, bỏ suspended nếu muốn). Gọi lib/export/anki.buildAnkiDeck → sinh .apkg bằng thư viện Node sinh apkg (cài, vd anki-apkg-export hoặc tương đương trong package.json). Stream file .apkg về (Content-Type application/octet-stream, filename bloom-YYYYMMDD.apkg). NẾU thư viện apkg không khả dụng → fallback xuất TSV .txt (cột: front, back, tags) import-được-vào-Anki. Tên deck "Bloóm".</action>
   <verify>Đăng nhập → curl -L /api/export/anki -o out.apkg; file out.apkg tải về > 0 byte; mở trong Anki desktop import được, thấy thẻ đúng 4 loại với câu ngữ cảnh. Gọi không đăng nhập → 401. Chỉ thấy thẻ của chính user.</verify>
   <done>File .apkg (hoặc TSV fallback) tải về và import vào Anki thành công, chỉ chứa thẻ của user đăng nhập.</done>
 </task>

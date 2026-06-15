@@ -1,6 +1,6 @@
 # 08 — Chọn từ thông minh ("Từ đáng học cho bạn") — MVP
 
-> Đây là phần khiến WorkLingo **thông minh thật**, không chỉ là máy tạo flashcard.
+> Đây là phần khiến Bloóm **thông minh thật**, không chỉ là máy tạo flashcard.
 > Thay vì hiện hết hàng trăm từ bắt người dùng tự lọc, app **tự gợi ý đúng những
 > từ đáng học** cho từng người. Quyết định: đưa vào **MVP**.
 

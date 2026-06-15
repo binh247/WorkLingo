@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { Button3D } from "@/components/Button3D";
@@ -13,7 +14,14 @@ export default async function Home() {
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-4 py-10">
       <header className="text-center">
-        <h1 className="text-4xl font-black text-brand">WorkLingo</h1>
+        <Image
+          src="/logo.png"
+          alt="Bloóm"
+          width={104}
+          height={115}
+          priority
+          className="mx-auto"
+        />
         <p className="mt-1 font-bold text-ink">
           Học tiếng Nhật từ chính công việc thật của bạn
         </p>

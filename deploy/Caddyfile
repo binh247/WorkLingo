@@ -1,6 +1,6 @@
-# Caddy reverse proxy cho WorkLingo (TLS tự động).
-# Đổi worklingo.example.com thành domain thật. Chạy: caddy run --config deploy/Caddyfile
-worklingo.example.com {
+# Caddy reverse proxy cho Bloóm (TLS tự động).
+# Đổi bloom.example.com thành domain thật. Chạy: caddy run --config deploy/Caddyfile
+bloom.example.com {
 	encode gzip
 	reverse_proxy 127.0.0.1:3000
 }

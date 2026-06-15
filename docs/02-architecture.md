@@ -2,7 +2,7 @@
 
 ## 1. Nguyên tắc chủ đạo: POSTGRESQL TỰ HOST, KHÔNG LOCK-IN
 
-WorkLingo dùng **PostgreSQL tự host** ngay từ đầu — **không dùng Supabase** (cả
+Bloóm dùng **PostgreSQL tự host** ngay từ đầu — **không dùng Supabase** (cả
 DB lẫn Auth). Kiến trúc giữ nguyên tắc chống lock-in để không phụ thuộc nhà cung
 cấp nào:
 
@@ -90,7 +90,7 @@ Xử lý nội dung (khi import):
 ## 4. Cấu trúc thư mục
 
 ```
-WorkLingo/
+Bloóm/
 ├── app/
 │   ├── (auth)/login/             # đăng nhập (Auth.js: email + Google)
 │   ├── api/auth/[...nextauth]/   # route handler của Auth.js

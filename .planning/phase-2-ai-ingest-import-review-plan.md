@@ -10,7 +10,7 @@
 
 ## Mục tiêu
 
-Dựng đầu-cuối luồng đưa nội dung tiếng Nhật thô vào WorkLingo và biến thành "dữ liệu
+Dựng đầu-cuối luồng đưa nội dung tiếng Nhật thô vào Bloóm và biến thành "dữ liệu
 cuối" (câu + token đã có furigana/nghĩa) sẵn sàng cho màn Học (Phase 3):
 
 1. **lib/ai (F2 lõi)** — interface AI chung + cài đặt OpenAI **gpt-4o**, hàm `ingest()`
@@ -130,7 +130,7 @@ Các "vùng xám" đã chốt, bám docs:
      `repositories/sources.ts` (lọc `user_id`). **Không** re-ingest khi sửa (giảm chi
      phí). Highlight câu `confidence = low` bằng `.wl-card` viền cảnh báo + `.wl-badge`.
 
-8. **UI tuân hệ thống thiết kế WorkLingo (lớp dùng chung), mobile-first, prefers-reduced-motion.**
+8. **UI tuân hệ thống thiết kế Bloóm (lớp dùng chung), mobile-first, prefers-reduced-motion.**
    - Căn cứ: [keyDecisions] bộ component bắt buộc (`.btn-3d` + biến thể màu, `.wl-input`,
      `.wl-select`, `.wl-card`, `.wl-badge`, `.wl-chip`). Nút "Phân tích" = `.btn-3d
      .btn-primary`; loại nguồn = `.wl-chip`; ô tiêu đề = `.wl-input`; textarea dán nội dung
@@ -145,7 +145,7 @@ Các "vùng xám" đã chốt, bám docs:
      không nhất quán giữa các phase.
    - **Chốt:** Phase 2 dựng **một** cơ chế dev-auth tối thiểu, tái dùng nguyên xi ở P3/P4:
      - **Script `lib/db/seed-user.ts`** (idempotent): tạo/đảm bảo 1 **user test** cố định
-       (email `dev@worklingo.local`, `role='user'`) và in ra `userId` (ENV `DEV_USER_ID`
+       (email `dev@bloom.local`, `role='user'`) và in ra `userId` (ENV `DEV_USER_ID`
        tiện cho các seed khác như `seed-review-demo` ở P4). Không tạo password thật.
      - **Provider Credentials chỉ-dev** trong `lib/auth.ts`, **chỉ bật khi
        `NODE_ENV !== 'production'` AND `AUTH_DEV_LOGIN === 'true'`** (mặc định tắt). Provider
@@ -176,7 +176,7 @@ Các "vùng xám" đã chốt, bám docs:
 <task type="auto">
   <name>Dev-auth dùng chung: seed-user + Credentials chỉ-dev + /login tối thiểu</name>
   <files>lib/db/seed-user.ts; lib/auth.ts; app/(auth)/login/page.tsx; .env.example</files>
-  <action>Theo QĐ-9 (dev-auth). Dựng cơ chế đăng nhập tạm để nghiệm thu P2–P4 (P3/P4 tái dùng, không tự dựng riêng): (1) `lib/db/seed-user.ts` — script tsx idempotent (ON CONFLICT theo email DO NOTHING) tạo/đảm bảo user test cố định `dev@worklingo.local`, `role='user'`; in `userId` ra stdout (để dùng làm `DEV_USER_ID` cho seed khác như `seed-review-demo` ở P4). KHÔNG đặt password thật. (2) `lib/auth.ts` — thêm provider **Credentials** vào mảng `providers` **chỉ khi** `process.env.NODE_ENV !== 'production' && process.env.AUTH_DEV_LOGIN === 'true'` (mặc định tắt; production luôn rỗng provider này); `authorize()` không cần mật khẩu, trả về user test (truy `users` theo email `dev@worklingo.local`, null nếu chưa seed); giữ `session.strategy` + callback gắn `role` y như Phase 1 để session dev giống session thật (có `user.id`, `role`). KHÔNG sửa repository/route nghiệp vụ. (3) `app/(auth)/login/page.tsx` — trang `/login` tối thiểu: nếu đã đăng nhập → redirect `/import`; nếu chưa, hiện nút `.btn-3d .btn-primary` "Đăng nhập (dev)" gọi `signIn('credentials')` (client). Ghi chú trong file: Phase 5 thay nội dung bằng Email/Google. (4) `.env.example` — thêm `AUTH_DEV_LOGIN="false"` (mô tả: "Bật đăng nhập dev tạm — CHỈ dev, P5 gỡ"). KHÔNG đụng providers Email/Google (Phase 5).</action>
+  <action>Theo QĐ-9 (dev-auth). Dựng cơ chế đăng nhập tạm để nghiệm thu P2–P4 (P3/P4 tái dùng, không tự dựng riêng): (1) `lib/db/seed-user.ts` — script tsx idempotent (ON CONFLICT theo email DO NOTHING) tạo/đảm bảo user test cố định `dev@bloom.local`, `role='user'`; in `userId` ra stdout (để dùng làm `DEV_USER_ID` cho seed khác như `seed-review-demo` ở P4). KHÔNG đặt password thật. (2) `lib/auth.ts` — thêm provider **Credentials** vào mảng `providers` **chỉ khi** `process.env.NODE_ENV !== 'production' && process.env.AUTH_DEV_LOGIN === 'true'` (mặc định tắt; production luôn rỗng provider này); `authorize()` không cần mật khẩu, trả về user test (truy `users` theo email `dev@bloom.local`, null nếu chưa seed); giữ `session.strategy` + callback gắn `role` y như Phase 1 để session dev giống session thật (có `user.id`, `role`). KHÔNG sửa repository/route nghiệp vụ. (3) `app/(auth)/login/page.tsx` — trang `/login` tối thiểu: nếu đã đăng nhập → redirect `/import`; nếu chưa, hiện nút `.btn-3d .btn-primary` "Đăng nhập (dev)" gọi `signIn('credentials')` (client). Ghi chú trong file: Phase 5 thay nội dung bằng Email/Google. (4) `.env.example` — thêm `AUTH_DEV_LOGIN="false"` (mô tả: "Bật đăng nhập dev tạm — CHỈ dev, P5 gỡ"). KHÔNG đụng providers Email/Google (Phase 5).</action>
   <verify>`npx tsx lib/db/seed-user.ts` in ra `userId`, chạy lần 2 không tạo trùng. Với `AUTH_DEV_LOGIN=true` (dev): mở `/login` bấm "Đăng nhập (dev)" → có session, `currentUser` trả user test; mở `/import` vào được. Với `AUTH_DEV_LOGIN` unset/false: `/api/auth/providers` không liệt kê credentials; `/import` khi chưa đăng nhập → redirect `/login`. `tsc --noEmit` sạch; build production không kích hoạt provider dev.</verify>
   <done>Có 1 cơ chế dev-auth dùng chung (seed-user + Credentials chỉ-dev + `/login` tối thiểu) cho phép P2/P3/P4 chạy tiêu chí "đăng nhập rồi…"; tắt mặc định + an toàn ở production; không thay phần việc auth thật của Phase 5.</done>
 </task>

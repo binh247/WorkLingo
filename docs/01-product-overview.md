@@ -2,9 +2,9 @@
 
 ## 1. Tầm nhìn
 
-**WorkLingo** giúp người đi làm học tiếng Nhật từ **chính nội dung công việc thật
+**Bloóm** giúp người đi làm học tiếng Nhật từ **chính nội dung công việc thật
 của họ** — thay vì giáo trình chung chung. Người dùng đưa vào đoạn chat công ty,
-transcript cuộc họp, hay một video YouTube; WorkLingo biến nội dung đó thành bài
+transcript cuộc họp, hay một video YouTube; Bloóm biến nội dung đó thành bài
 học: tách từ, tra nghĩa tiếng Việt, tạo flashcard giữ nguyên ngữ cảnh, và ôn tập
 theo thuật toán lặp lại ngắt quãng (SRS).
 
@@ -27,7 +27,7 @@ theo thuật toán lặp lại ngắt quãng (SRS).
 
 ## 4. Điểm khác biệt
 
-| App thông thường (Anki, Duolingo) | WorkLingo |
+| App thông thường (Anki, Duolingo) | Bloóm |
 |-----------------------------------|-----------|
 | Nội dung soạn sẵn, chung chung | Nội dung **công việc thật của bạn** |
 | Học rời ngữ cảnh | Giữ nguyên câu gốc + nguồn |

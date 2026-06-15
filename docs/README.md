@@ -1,4 +1,4 @@
-# WorkLingo — Tài liệu dự án
+# Bloóm — Tài liệu dự án
 
 > Học tiếng Nhật từ chính nội dung công việc thật của bạn — đoạn chat, transcript
 > cuộc họp, video YouTube — theo phương pháp immersion + sentence mining (kiểu

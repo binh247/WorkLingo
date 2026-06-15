@@ -9,7 +9,7 @@
 
 ## Mục tiêu
 
-Hoàn thành các tính năng auth/quản trị/triển khai để WorkLingo chạy được trên
+Hoàn thành các tính năng auth/quản trị/triển khai để Bloóm chạy được trên
 server thật, có người dùng thật, bảo mật dữ liệu theo `user_id`:
 
 - **F1 — Đăng nhập:** Auth.js (NextAuth) + Drizzle adapter, đăng nhập
@@ -115,7 +115,7 @@ Các điểm "xám" và lựa chọn đã chốt, có lý do bám docs:
 ### QĐ7 — Streak timezone: một giá trị duy nhất, một nơi seed
 - **Chốt:** Trả lời "câu hỏi mở" của 04-features §5: streak/`last_studied_date`
   tính theo timezone lấy từ `app_settings.app_timezone`. **Giá trị chốt duy nhất
-  toàn hệ thống: `"Asia/Ho_Chi_Minh"`** (WorkLingo phục vụ người Việt — căn cứ
+  toàn hệ thống: `"Asia/Ho_Chi_Minh"`** (Bloóm phục vụ người Việt — căn cứ
   `userEmail` `@aureole-it.vn`; đây cũng là giá trị fallback cứng trong
   `lib/config`).
 - **Một nơi seed duy nhất — đồng bộ với Phase 4:** Phase 4 (QĐ5 + QĐ10 + task seed)
@@ -347,7 +347,7 @@ Các điểm "xám" và lựa chọn đã chốt, có lý do bám docs:
 <task type="auto">
   <name>Cấu hình deploy: PM2 + build production</name>
   <files>ecosystem.config.js, package.json (scripts start:prod), docs/deploy.md</files>
-  <action>Tạo ecosystem.config.js (PM2): app name worklingo, script "npm run start", instances 1 (hoặc cluster nếu cần), env NODE_ENV=production, đọc .env. Thêm script build:prod = "next build", start:prod = "next start -p 3000". Viết docs/deploy.md mô tả: docker compose up -d (postgres:18 đã có trong docker-compose.yml), drizzle-kit migrate, create-admin, pm2 start ecosystem.config.js, pm2 save + startup. Nhấn dùng connection pool postgres.js (02-architecture §8).</action>
+  <action>Tạo ecosystem.config.js (PM2): app name bloom, script "npm run start", instances 1 (hoặc cluster nếu cần), env NODE_ENV=production, đọc .env. Thêm script build:prod = "next build", start:prod = "next start -p 3000". Viết docs/deploy.md mô tả: docker compose up -d (postgres:18 đã có trong docker-compose.yml), drizzle-kit migrate, create-admin, pm2 start ecosystem.config.js, pm2 save + startup. Nhấn dùng connection pool postgres.js (02-architecture §8).</action>
   <verify>`npm run build:prod` build thành công; `pm2 start ecosystem.config.js` chạy app, `pm2 status` thấy online; mở http://localhost:3000 phản hồi.</verify>
   <done>App production chạy dưới PM2 ổn định (auto-restart), docs/deploy.md mô tả đủ bước dựng từ máy trống.</done>
 </task>
@@ -355,7 +355,7 @@ Các điểm "xám" và lựa chọn đã chốt, có lý do bám docs:
 <task type="auto">
   <name>Reverse proxy Caddy + TLS</name>
   <files>Caddyfile, docs/deploy.md (bổ sung)</files>
-  <action>Tạo Caddyfile: domain (vd worklingo.example.com) reverse_proxy localhost:3000; Caddy tự xin/renew TLS Let's Encrypt. Ghi chú mở port 80/443, đặt domain DNS A record. Bổ sung docs/deploy.md phần Caddy (cài, đặt Caddyfile, caddy run/systemd). Bám 02-architecture §8 (reverse proxy + TLS).</action>
+  <action>Tạo Caddyfile: domain (vd bloom.example.com) reverse_proxy localhost:3000; Caddy tự xin/renew TLS Let's Encrypt. Ghi chú mở port 80/443, đặt domain DNS A record. Bổ sung docs/deploy.md phần Caddy (cài, đặt Caddyfile, caddy run/systemd). Bám 02-architecture §8 (reverse proxy + TLS).</action>
   <verify>Trên server có domain: `caddy validate --config Caddyfile` OK; truy cập https://domain trả app qua TLS hợp lệ (chứng chỉ Let's Encrypt). Ở local: caddy validate pass.</verify>
   <done>Caddyfile hợp lệ, reverse proxy về app cổng 3000, TLS tự động; docs hướng dẫn rõ.</done>
 </task>
@@ -363,8 +363,8 @@ Các điểm "xám" và lựa chọn đã chốt, có lý do bám docs:
 <task type="auto">
   <name>Script sao lưu pg_dump định kỳ</name>
   <files>scripts/backup-db.sh, docs/deploy.md (bổ sung cron)</files>
-  <action>Tạo scripts/backup-db.sh: đọc DATABASE_URL (hoặc biến PG*), chạy pg_dump (qua docker exec worklingo-postgres pg_dump hoặc pg_dump trực tiếp), nén gzip ra thư mục backups/ với tên worklingo-YYYYMMDD-HHMM.sql.gz, xoá bản cũ hơn N ngày (mặc định 14). chmod +x. Bổ sung docs/deploy.md mục crontab ví dụ "0 3 * * * /path/scripts/backup-db.sh". Bám 02-architecture §8 (sao lưu pg_dump định kỳ).</action>
-  <verify>Chạy `bash scripts/backup-db.sh` → tạo file backups/worklingo-*.sql.gz; `gunzip -t` file hợp lệ; chạy lần 2 → file mới, file quá hạn bị xoá.</verify>
+  <action>Tạo scripts/backup-db.sh: đọc DATABASE_URL (hoặc biến PG*), chạy pg_dump (qua docker exec bloom-postgres pg_dump hoặc pg_dump trực tiếp), nén gzip ra thư mục backups/ với tên bloom-YYYYMMDD-HHMM.sql.gz, xoá bản cũ hơn N ngày (mặc định 14). chmod +x. Bổ sung docs/deploy.md mục crontab ví dụ "0 3 * * * /path/scripts/backup-db.sh". Bám 02-architecture §8 (sao lưu pg_dump định kỳ).</action>
+  <verify>Chạy `bash scripts/backup-db.sh` → tạo file backups/bloom-*.sql.gz; `gunzip -t` file hợp lệ; chạy lần 2 → file mới, file quá hạn bị xoá.</verify>
   <done>Backup tạo file .sql.gz hợp lệ, rotate theo số ngày; docs ghi cron ví dụ.</done>
 </task>
 

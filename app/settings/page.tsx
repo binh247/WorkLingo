@@ -21,7 +21,7 @@ export default async function SettingsPage() {
         <div className="flex-1">
           <h1 className="text-3xl font-black leading-tight text-ink">Cài đặt</h1>
           <p className="font-bold text-ink-muted">
-            Tùy chỉnh cách WorkLingo tạo và ôn thẻ cho bạn
+            Tùy chỉnh cách Bloóm tạo và ôn thẻ cho bạn
           </p>
         </div>
         <span className="text-4xl">⚙️</span>

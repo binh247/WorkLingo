@@ -38,7 +38,7 @@ export async function GET() {
     status: 200,
     headers: {
       "Content-Type": "text/tab-separated-values; charset=utf-8",
-      "Content-Disposition": 'attachment; filename="worklingo-anki.tsv"',
+      "Content-Disposition": 'attachment; filename="bloom-anki.tsv"',
     },
   });
 }

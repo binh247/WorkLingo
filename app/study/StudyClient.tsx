@@ -10,7 +10,12 @@ import { cn } from "@/lib/utils";
 import type { Token } from "@/lib/db/types";
 import type { SuggestedWord } from "@/lib/study/word-selection";
 import type { WordStatus } from "@/lib/repositories/userWords";
-import { explainGrammarAction, markWordKnown, saveWordAsCards } from "./actions";
+import {
+  deleteSentenceAction,
+  explainGrammarAction,
+  markWordKnown,
+  saveWordAsCards,
+} from "./actions";
 
 type StudySentence = {
   id: string;
@@ -37,6 +42,8 @@ export function StudyClient({
   const [statusMap, setStatusMap] = React.useState<Map<string, WordStatus>>(
     () => new Map(statusEntries),
   );
+  const [sentenceList, setSentenceList] =
+    React.useState<StudySentence[]>(sentences);
   const plusOne = React.useMemo(() => new Set(plusOneIds), [plusOneIds]);
   const [selected, setSelected] = React.useState<{
     token: Token;
@@ -70,6 +77,15 @@ export function StudyClient({
       await markWordKnown(lemma, surface);
     });
     setSelected(null);
+  }
+
+  function onDeleteSentence(id: string) {
+    if (!window.confirm("Xóa hẳn câu này? Không khôi phục được.")) return;
+    setSentenceList((prev) => prev.filter((s) => s.id !== id));
+    if (selected?.sentenceId === id) setSelected(null);
+    startTransition(async () => {
+      await deleteSentenceAction(id);
+    });
   }
 
   function onSaveAll(lemmas: string[]) {
@@ -114,7 +130,7 @@ export function StudyClient({
       />
 
       <div className="flex flex-col gap-3">
-        {sentences.map((s) => (
+        {sentenceList.map((s) => (
           <div
             key={s.id}
             className={cn(
@@ -133,14 +149,25 @@ export function StudyClient({
                   setSelected({ token, sentenceId: s.id })
                 }
               />
-              <Button3D
-                variant="neutral"
-                size="sm"
-                aria-label="Đọc câu"
-                onClick={() => speakSentence(s.text)}
-              >
-                🔊
-              </Button3D>
+              <div className="flex shrink-0 gap-1">
+                <Button3D
+                  variant="neutral"
+                  size="sm"
+                  aria-label="Đọc câu"
+                  onClick={() => speakSentence(s.text)}
+                >
+                  🔊
+                </Button3D>
+                <Button3D
+                  variant="danger"
+                  size="sm"
+                  aria-label="Xóa câu"
+                  disabled={pending}
+                  onClick={() => onDeleteSentence(s.id)}
+                >
+                  🗑
+                </Button3D>
+              </div>
             </div>
             <GrammarPanel sentenceText={s.text} />
           </div>

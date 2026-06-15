@@ -9,6 +9,7 @@
  */
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
@@ -98,9 +99,15 @@ export function AppShell({
         <Link
           href="/dashboard"
           className="mb-2 flex items-center gap-2 px-2 py-3"
+          aria-label="Bloóm"
         >
-          <span className="text-3xl">🦉</span>
-          <span className="text-2xl font-extrabold text-brand">WorkLingo</span>
+          <Image
+            src="/logo.png"
+            alt="Bloóm"
+            width={50}
+            height={55}
+            priority
+          />
         </Link>
         {items.map(navLink)}
         <div className="mt-auto flex flex-col gap-2">
@@ -126,11 +133,12 @@ export function AppShell({
           className="sticky top-0 z-30 border-b-2 border-[#EEE] bg-white md:hidden"
         >
           <div className="flex items-center justify-between px-4 py-2">
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <span className="text-2xl">🦉</span>
-              <span className="text-lg font-extrabold text-brand">
-                WorkLingo
-              </span>
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2"
+              aria-label="Bloóm"
+            >
+              <Image src="/logo.png" alt="Bloóm" width={33} height={36} priority />
             </Link>
             <button
               type="button"

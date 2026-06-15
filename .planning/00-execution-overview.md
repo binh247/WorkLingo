@@ -276,7 +276,7 @@ KHÔNG cần cả vòng phase — dùng `/gsd:quick` (xem
 ### 5.1 Vùng ngọt context (clear giữa phase)
 
 Nguyên lý GSD: giữ phiên chính ở **0–30% context** ("vùng ngọt") để chất lượng
-code không suy giảm. Cụ thể cho WorkLingo:
+code không suy giảm. Cụ thể cho Bloóm:
 
 - **`/clear` giữa MỖI bước lớn**, đặc biệt **bắt buộc** giữa hai phase (sau khi
   đổi ROADMAP ✅, trước khi discuss phase kế). Không để context phase 3 lẫn sang
@@ -303,7 +303,7 @@ Theo [`docs/12-gsd-workflow.md §9`](../docs/12-gsd-workflow.md):
 | `balanced` (mặc định) | Opus | Sonnet | Sonnet |
 | `budget` | Sonnet | Sonnet | Haiku |
 
-**Gợi ý profile theo từng phase WorkLingo:**
+**Gợi ý profile theo từng phase Bloóm:**
 
 | Phase | Profile khuyến nghị | Lý do |
 |-------|---------------------|-------|
@@ -327,13 +327,13 @@ nhiều & đơn giản (7).
 
 | Phase | File kế hoạch (đường dẫn tuyệt đối) |
 |-------|-------------------------------------|
-| 1 | `/Users/ongbinhit/working/source/WorkLingo/.planning/phase-1-framework-foundation-plan.md` |
-| 2 | `/Users/ongbinhit/working/source/WorkLingo/.planning/phase-2-ai-ingest-import-review-plan.md` |
-| 3 | `/Users/ongbinhit/working/source/WorkLingo/.planning/phase-3-study-wordselection-flashcards-plan.md` |
-| 4 | `/Users/ongbinhit/working/source/WorkLingo/.planning/phase-4-srs-gamification-plan.md` |
-| 5 | `/Users/ongbinhit/working/source/WorkLingo/.planning/phase-5-auth-admin-dashboard-deploy-plan.md` |
-| 6 | `/Users/ongbinhit/working/source/WorkLingo/.planning/phase-6-phase2-media-grammar-plan.md` |
-| 7 | `/Users/ongbinhit/working/source/WorkLingo/.planning/phase-7-phase3-stats-social-export-plan.md` |
+| 1 | `/Users/ongbinhit/working/source/Bloóm/.planning/phase-1-framework-foundation-plan.md` |
+| 2 | `/Users/ongbinhit/working/source/Bloóm/.planning/phase-2-ai-ingest-import-review-plan.md` |
+| 3 | `/Users/ongbinhit/working/source/Bloóm/.planning/phase-3-study-wordselection-flashcards-plan.md` |
+| 4 | `/Users/ongbinhit/working/source/Bloóm/.planning/phase-4-srs-gamification-plan.md` |
+| 5 | `/Users/ongbinhit/working/source/Bloóm/.planning/phase-5-auth-admin-dashboard-deploy-plan.md` |
+| 6 | `/Users/ongbinhit/working/source/Bloóm/.planning/phase-6-phase2-media-grammar-plan.md` |
+| 7 | `/Users/ongbinhit/working/source/Bloóm/.planning/phase-7-phase3-stats-social-export-plan.md` |
 
 Đường dẫn tương đối (đọc trong repo): [phase-1](phase-1-framework-foundation-plan.md)
 · [phase-2](phase-2-ai-ingest-import-review-plan.md)
@@ -366,8 +366,8 @@ nhiều & đơn giản (7).
 > `components-catalog.md` liệt kê lớp 2, `pages-routes.md` liệt kê lớp 3. Nên tạo
 > chúng song song với Phase 1 và cập nhật ở mỗi phase khi thêm component/route mới.
 > Đặt cạnh tài liệu này trong `.planning/` (vd
-> `/Users/ongbinhit/working/source/WorkLingo/.planning/components-catalog.md`,
-> `/Users/ongbinhit/working/source/WorkLingo/.planning/pages-routes.md`).
+> `/Users/ongbinhit/working/source/Bloóm/.planning/components-catalog.md`,
+> `/Users/ongbinhit/working/source/Bloóm/.planning/pages-routes.md`).
 
 ### 6.4 Nguồn sự thật (`docs/`)
 

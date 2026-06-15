@@ -1,4 +1,4 @@
-# WorkLingo
+# Bloóm
 
 Tài liệu dự án đã được tách thành bộ tài liệu chuẩn trong thư mục **[`docs/`](docs/)**.
 

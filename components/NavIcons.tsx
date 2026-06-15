@@ -1,6 +1,6 @@
 /**
  * Bộ icon SVG cho menu — tự vẽ theo phong cách "game hoá" (phẳng, đậm,
- * bo tròn, nhiều màu trên nền tươi). Asset gốc của WorkLingo, không dùng
+ * bo tròn, nhiều màu trên nền tươi). Asset gốc của Bloóm, không dùng
  * tài nguyên của bên thứ ba.
  */
 import * as React from "react";

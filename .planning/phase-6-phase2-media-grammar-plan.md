@@ -1,6 +1,6 @@
 # GSD Phase 6 — GĐ2 — Audio/Video, YouTube, Ngữ pháp
 
-> Kế hoạch GSD cho **GĐ2** của WorkLingo: gộp **F6 (Upload audio/video → Whisper)**,
+> Kế hoạch GSD cho **GĐ2** của Bloóm: gộp **F6 (Upload audio/video → Whisper)**,
 > **F7 (AI giải thích ngữ pháp)** và **import phụ đề YouTube** vào cùng một phase vì
 > cả ba đều **đưa thêm đầu vào / chức năng vào pipeline AI Ingest và màn study đã có**.
 > Nguồn sự thật: [docs/04-features.md](../docs/04-features.md) (F6, F7, mục 1 bản đồ

@@ -1,4 +1,4 @@
-# WorkLingo — Tầm nhìn dự án (điểm vào cho GSD)
+# Bloóm — Tầm nhìn dự án (điểm vào cho GSD)
 
 > **File này là ĐIỂM VÀO cho GSD.** Nó chỉ tóm tắt tầm nhìn và trỏ sang bộ tài
 > liệu thật trong [`docs/`](docs/README.md) — **nguồn sự thật duy nhất**. Khi cần
@@ -6,7 +6,7 @@
 
 ## Tầm nhìn (ngắn)
 
-**WorkLingo** giúp người đi làm học tiếng Nhật từ **chính nội dung công việc thật
+**Bloóm** giúp người đi làm học tiếng Nhật từ **chính nội dung công việc thật
 của họ** (đoạn chat công ty, transcript cuộc họp, video YouTube) thay vì giáo
 trình chung chung. App biến nội dung đó thành bài học: tách câu, tách từ +
 furigana, nghĩa tiếng Việt, tạo flashcard **giữ nguyên ngữ cảnh**, rồi ôn tập

@@ -1,6 +1,6 @@
 /**
  * Seed user test (dev) — idempotent. Đặt sẵn mật khẩu để test đăng nhập thật.
- * Email: dev@worklingo.local | Mật khẩu: devpass123 | role: admin (để test /admin)
+ * Email: dev@bloom.local | Mật khẩu: devpass123 | role: admin (để test /admin)
  * Chạy: npx tsx lib/db/seed-user.ts
  */
 import "dotenv/config";
@@ -9,7 +9,7 @@ import { eq } from "drizzle-orm";
 import { db } from "./index";
 import { users } from "./schema";
 
-const DEV_USER_EMAIL = "dev@worklingo.local";
+const DEV_USER_EMAIL = "dev@bloom.local";
 const DEV_PASSWORD = "devpass123";
 
 async function main() {

@@ -11,10 +11,10 @@ họp/đọc nội dung → nhận ra lỗi nhanh hơn mọi AI.
 
 ## 2. Hai kiểu đưa nội dung vào (khác nhau ở chỗ có audio hay không)
 
-| Kiểu | Audio trong WorkLingo? | Nghe lại để kiểm? | Giai đoạn |
+| Kiểu | Audio trong Bloóm? | Nghe lại để kiểm? | Giai đoạn |
 |------|------------------------|-------------------|-----------|
 | **A. Upload .txt** (AI làm sẵn nơi khác) | ❌ Không | ❌ Không | **MVP** |
-| **B. Upload audio/video** → WorkLingo tự STT | ✅ Có | ✅ Có (theo câu) | GĐ2 |
+| **B. Upload audio/video** → Bloóm tự STT | ✅ Có | ✅ Có (theo câu) | GĐ2 |
 
 → Biện pháp **"nghe lại audio" chỉ dùng cho kiểu B**. Kiểu A (MVP) phải dựa vào
 các biện pháp **không cần audio** dưới đây.
@@ -49,7 +49,7 @@ dùng ưu tiên kiểm.
 - Có thể kết hợp độ tin cậy của Whisper (STT) với `confidence` của AI Ingest để
   đánh dấu câu cần kiểm.
 - **Khuyến nghị người dùng:** nếu còn file audio gốc, hãy upload audio vào
-  WorkLingo (kiểu B) thay vì dán transcript làm sẵn — để được nghe lại khi kiểm.
+  Bloóm (kiểu B) thay vì dán transcript làm sẵn — để được nghe lại khi kiểm.
 
 ## 5. Tóm tắt biện pháp theo trường hợp
 

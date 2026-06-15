@@ -1,4 +1,4 @@
-# WorkLingo
+# Bloóm
 
 Học tiếng Nhật từ chính nội dung công việc thật của bạn (chat, transcript họp,
 video) theo phương pháp immersion + sentence mining + SRS, trải nghiệm gamified
@@ -26,8 +26,8 @@ Cấu hình hệ thống lưu trong bảng `app_settings` (đọc qua `lib/confi
 
 ```bash
 # 0. Lấy mã nguồn + cài dependency
-git clone https://github.com/binh247/WorkLingo.git
-cd WorkLingo
+git clone https://github.com/binh247/bloom.git
+cd bloom
 npm install
 
 # 1. Cấu hình môi trường
@@ -40,17 +40,17 @@ cp .env.example .env
 # Quản trị /admin (bảng app_settings), không nằm trong .env.
 
 # 2. Khởi động PostgreSQL (Docker)
-docker compose up -d          # container worklingo-postgres, cổng POSTGRES_PORT
+docker compose up -d          # container bloom-postgres, cổng POSTGRES_PORT
 
 # 3. Tạo cấu trúc database — chọn MỘT trong hai cách:
 # (A) Nhanh — nạp thẳng file SQL đầy đủ (đã kèm sổ migration Drizzle):
-docker exec -i worklingo-postgres psql -U worklingo -d worklingo < deploy/schema.sql
+docker exec -i bloom-postgres psql -U bloom -d bloom < deploy/schema.sql
 # (B) Chuẩn Drizzle — chạy lần lượt các migration:
 npm run db:migrate
 
 # 4. Seed dữ liệu khởi tạo
 npm run db:seed               # 7 key cấu hình app_settings (idempotent)
-npx tsx lib/db/seed-user.ts   # user dev: dev@worklingo.local / devpass123 (admin)
+npx tsx lib/db/seed-user.ts   # user dev: dev@bloom.local / devpass123 (admin)
 
 # 5. Chạy
 npm run dev                   # http://localhost:3000
@@ -84,7 +84,7 @@ nếu đã điền key.
 | `npm run db:seed` | Seed `app_settings` (idempotent) |
 | `npm run db:schema-sql` | Tái sinh `deploy/schema.sql` từ DB đang chạy |
 | `npm run db:studio` | Drizzle Studio (GUI xem DB) |
-| `npx tsx lib/db/seed-user.ts` | Tạo user dev (dev@worklingo.local) |
+| `npx tsx lib/db/seed-user.ts` | Tạo user dev (dev@bloom.local) |
 
 ## Cấu trúc
 
@@ -107,6 +107,6 @@ deploy/            # schema.sql, Caddyfile, PM2, backup script
 - **Lỗi kết nối DB**: kiểm tra container `docker ps`, `DATABASE_URL` khớp
   `POSTGRES_*` trong `.env`, cổng không bị chiếm.
 - **Đăng nhập user dev không được**: cần chạy `npx tsx lib/db/seed-user.ts`
-  trước (tạo user dev@worklingo.local / devpass123).
+  trước (tạo user dev@bloom.local / devpass123).
 - **AI Ingest lỗi**: kiểm tra `openai_api_key`/`openai_base_url`/`openai_model`
   trong trang Quản trị (bảng `app_settings`).

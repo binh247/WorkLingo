@@ -1,6 +1,6 @@
-# WorkLingo — CATALOG COMPONENT đầy đủ
+# Bloóm — CATALOG COMPONENT đầy đủ
 
-> Danh mục **mọi component** cần xây cho WorkLingo, gồm **component nghiệp vụ**
+> Danh mục **mọi component** cần xây cho Bloóm, gồm **component nghiệp vụ**
 > (study/review/import/admin/gamification) và **component nền** (layout, nav,
 > shadcn `ui/*`). Nhóm theo **GSD Phase** (1→7).
 >
@@ -141,7 +141,7 @@
 
 | Tên | Mục đích | Props chính | Dùng ở trang nào | Phase |
 |-----|----------|-------------|------------------|-------|
-| `AppHeader` / `NavBar` | Thanh điều hướng chính: logo WorkLingo, link Dashboard/Học/Ôn tập (danh sách tài liệu nằm trên Dashboard — **không có link `/library` ở MVP**), gắn `UserMenu`; ẩn ở `(auth)` | `user`, `activePath` | Mọi trang đã đăng nhập | 5 |
+| `AppHeader` / `NavBar` | Thanh điều hướng chính: logo Bloóm, link Dashboard/Học/Ôn tập (danh sách tài liệu nằm trên Dashboard — **không có link `/library` ở MVP**), gắn `UserMenu`; ẩn ở `(auth)` | `user`, `activePath` | Mọi trang đã đăng nhập | 5 |
 | `UserMenu` | Menu user: tên/email (từ session), link **Đổi mật khẩu**, link **/admin** (chỉ khi `role=admin`), nút **Đăng xuất** (`signOut`) | `user`, `isAdmin` | Header layout chính | 5 |
 | `AppShell` / layout chính | Bọc các trang đã đăng nhập: Header + nội dung; `(auth)` layout riêng (không header) | `children` | Mọi trang app | 5 |
 | `AuthLayout` (`app/(auth)/layout.tsx`) | Khung tối giản cho login/forgot/reset (logo + card giữa màn) | `children` | `/login`, `/forgot`, `/reset-password` | 5 |

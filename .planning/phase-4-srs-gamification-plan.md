@@ -199,7 +199,7 @@ Liệt kê các "vùng xám" đã chốt, kèm lý do bám docs:
     entry vào cùng module này**, không tạo danh sách key song song.
   - **Timezone:** giá trị mặc định `app_timezone` cũng nằm trong DEFAULTS để tránh
     lệch giữa các phase. **Chốt một giá trị duy nhất** trong DEFAULTS:
-    **`"Asia/Ho_Chi_Minh"`** (WorkLingo phục vụ **người Việt** học tiếng Nhật theo
+    **`"Asia/Ho_Chi_Minh"`** (Bloóm phục vụ **người Việt** học tiếng Nhật theo
     [01](../docs/01-product-overview.md) — đồng bộ với Phase 5 QĐ7 vốn đã chốt giá
     trị này). Admin đổi runtime nếu cần. Phase 4 là **nơi seed gốc**; Phase 5 đọc lại
     CÙNG key, KHÔNG re-seed giá trị khác.

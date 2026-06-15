@@ -1,4 +1,4 @@
-# Bản đồ PAGES / ROUTES — WorkLingo (App Router)
+# Bản đồ PAGES / ROUTES — Bloóm (App Router)
 
 > **Mục đích:** Liệt kê đầy đủ MỌI route trong `app/` (Next.js 15 App Router) — cả
 > trang UI (page) lẫn route handler/API — kèm phân quyền, Feature ID, GSD Phase và

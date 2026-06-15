@@ -74,7 +74,7 @@ function speakWebSpeech(text: string, opts?: SpeakOptions): void {
     u.lang = voice.lang; // khớp lang với giọng đã chọn
   } else {
     console.warn(
-      "[WorkLingo TTS] Máy chưa có giọng tiếng Nhật — phát âm có thể sai. " +
+      "[Bloóm TTS] Máy chưa có giọng tiếng Nhật — phát âm có thể sai. " +
         "Hãy cài gói giọng tiếng Nhật của hệ điều hành hoặc dùng Chrome.",
     );
   }

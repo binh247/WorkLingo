@@ -7,7 +7,7 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 /**
- * Khối/thẻ nội dung chuẩn WorkLingo (.wl-card): nền trắng, viền 2px, bo 1.5rem.
+ * Khối/thẻ nội dung chuẩn Bloóm (.wl-card): nền trắng, viền 2px, bo 1.5rem.
  */
 export function Card({ className, noPadding, ...props }: CardProps) {
   return (

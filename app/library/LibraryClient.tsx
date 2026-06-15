@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { Button3D } from "@/components/Button3D";
 import { cn } from "@/lib/utils";
+import { deleteSourceAction } from "./actions";
 
 type LibSource = {
   id: string;
@@ -54,9 +55,23 @@ const FILTERS = [
 export function LibraryClient({ sources }: { sources: LibSource[] }) {
   const [query, setQuery] = React.useState("");
   const [filter, setFilter] = React.useState("all");
+  const [items, setItems] = React.useState<LibSource[]>(sources);
+  const [pending, startTransition] = React.useTransition();
+
+  function onDelete(s: LibSource) {
+    const msg =
+      s.cardCount > 0
+        ? `Xóa tài liệu "${s.title}"? ${s.sentenceCount} câu và ${s.cardCount} thẻ đã đào sẽ bị xóa. Không khôi phục được.`
+        : `Xóa tài liệu "${s.title}"? Không khôi phục được.`;
+    if (!window.confirm(msg)) return;
+    setItems((prev) => prev.filter((x) => x.id !== s.id));
+    startTransition(async () => {
+      await deleteSourceAction(s.id);
+    });
+  }
 
   const q = query.trim().toLowerCase();
-  const visible = sources.filter((s) => {
+  const visible = items.filter((s) => {
     const matchType = filter === "all" || s.type === filter;
     const matchText = q === "" || s.title.toLowerCase().includes(q);
     return matchType && matchText;
@@ -112,14 +127,14 @@ export function LibraryClient({ sources }: { sources: LibSource[] }) {
 
       {visible.length === 0 ? (
         <div className="py-12 text-center">
-          <div className="mb-3 text-5xl">{sources.length === 0 ? "📭" : "🔍"}</div>
+          <div className="mb-3 text-5xl">{items.length === 0 ? "📭" : "🔍"}</div>
           <p className="font-extrabold text-ink">
-            {sources.length === 0
+            {items.length === 0
               ? "Chưa có tài liệu nào"
               : "Không tìm thấy tài liệu nào"}
           </p>
           <p className="mt-1 text-sm font-bold text-ink-muted">
-            {sources.length === 0 ? (
+            {items.length === 0 ? (
               <Link href="/import" className="text-brand-dark underline">
                 Thêm tài liệu đầu tiên →
               </Link>
@@ -159,13 +174,25 @@ export function LibraryClient({ sources }: { sources: LibSource[] }) {
                       {s.cardCount} thẻ
                     </p>
                   </div>
-                  <Link
-                    href={`/study?source=${s.id}`}
-                    title="Học tài liệu này"
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border-2 border-brand-dark bg-brand text-xl font-extrabold leading-none text-white transition-colors hover:bg-brand-dark"
-                  >
-                    ›
-                  </Link>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onDelete(s)}
+                      disabled={pending}
+                      title="Xóa tài liệu"
+                      aria-label="Xóa tài liệu"
+                      className="flex h-10 w-10 items-center justify-center rounded-2xl border-2 border-danger-dark bg-danger text-lg leading-none text-white transition-colors hover:bg-danger-dark disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      🗑
+                    </button>
+                    <Link
+                      href={`/study?source=${s.id}`}
+                      title="Học tài liệu này"
+                      className="flex h-10 w-10 items-center justify-center rounded-2xl border-2 border-brand-dark bg-brand text-xl font-extrabold leading-none text-white transition-colors hover:bg-brand-dark"
+                    >
+                      ›
+                    </Link>
+                  </div>
                 </div>
               </div>
             );

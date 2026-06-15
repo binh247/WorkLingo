@@ -1,7 +1,7 @@
-# 12 — Hướng dẫn quy trình GSD cho WorkLingo
+# 12 — Hướng dẫn quy trình GSD cho Bloóm
 
 > **GSD (Get Shit Done)** là khung phát triển hướng đặc tả (spec-driven) cho
-> Claude Code. Tài liệu này hướng dẫn dùng GSD cho WorkLingo: từ cài đặt ban đầu
+> Claude Code. Tài liệu này hướng dẫn dùng GSD cho Bloóm: từ cài đặt ban đầu
 > đến quy trình thêm chức năng mới.
 >
 > Nguyên lý cốt lõi: chia dự án thành nhiệm vụ nhỏ, mỗi nhiệm vụ chạy trong cửa
@@ -43,7 +43,7 @@ GSD hiểu dự án qua các file trạng thái:
 | `CONTEXT.md` | Sở thích/quyết định thu được khi `discuss-phase` |
 | `.planning/research/` | Kết quả nghiên cứu (nếu dùng `--research`) |
 
-> **WorkLingo đặc thù:** bộ tài liệu thật nằm trong [`docs/`](README.md)
+> **Bloóm đặc thù:** bộ tài liệu thật nằm trong [`docs/`](README.md)
 > (overview, architecture, data-model, features, design-system, roadmap). Ta giữ
 > `docs/` là **nguồn sự thật** và để `PROJECT.md`/`ROADMAP.md` chỉ trỏ tới nó.
 
@@ -56,7 +56,7 @@ GSD hiểu dự án qua các file trạng thái:
 GSD commit từng task, nên dự án phải là git repo:
 
 ```bash
-cd /Users/ongbinhit/working/source/WorkLingo
+cd /Users/ongbinhit/working/source/Bloóm
 git init
 git add -A && git commit -m "Initial: docs + mockups before GSD"
 ```
@@ -90,14 +90,14 @@ Thêm vào `.claude/settings.local.json` mảng `permissions.allow`:
 
 ## 3. File cầu nối & ánh xạ Phase ↔ Feature
 
-GSD lập kế hoạch theo **số phase** (`plan-phase 1`, `2`...). Còn docs WorkLingo
+GSD lập kế hoạch theo **số phase** (`plan-phase 1`, `2`...). Còn docs Bloóm
 đánh số theo **feature** (F1, F2...) và **giai đoạn** ([MVP], [GĐ2], [GĐ3]).
 Hai hệ này KHÔNG tự khớp — phải ánh xạ rõ trong `ROADMAP.md`.
 
 **`PROJECT.md`** (ở thư mục gốc — điểm vào cho GSD):
 
 ```markdown
-# WorkLingo — Project Vision
+# Bloóm — Project Vision
 > Nguồn chi tiết: docs/. File này là điểm vào cho GSD.
 - Tầm nhìn:        docs/01-product-overview.md
 - Kiến trúc:       docs/02-architecture.md
@@ -109,7 +109,7 @@ Hai hệ này KHÔNG tự khớp — phải ánh xạ rõ trong `ROADMAP.md`.
 **`ROADMAP.md`** (ở thư mục gốc — bảng ánh xạ + trạng thái):
 
 ```markdown
-# WorkLingo — Roadmap (GSD phases)
+# Bloóm — Roadmap (GSD phases)
 > Nguồn gốc: docs/06-roadmap.md, docs/04-features.md
 
 | GSD Phase | Feature trong docs | Giai đoạn | Trạng thái |
@@ -234,7 +234,7 @@ phase, dùng:
 /gsd:quick --discuss --research --full  # nhỏ nhưng đủ discuss + verify
 ```
 
-Ví dụ WorkLingo: "thêm nút export 1 deck", "đổi âm thanh phản hồi", "thêm 1 loại
+Ví dụ Bloóm: "thêm nút export 1 deck", "đổi âm thanh phản hồi", "thêm 1 loại
 flashcard".
 
 | Tình huống | Dùng |

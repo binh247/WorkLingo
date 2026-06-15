@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Tái sinh deploy/schema.sql từ database đang chạy (container worklingo-postgres).
+# Tái sinh deploy/schema.sql từ database đang chạy (container bloom-postgres).
 # Chạy: npm run db:schema-sql  (hoặc bash deploy/gen-schema-sql.sh)
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-CONTAINER="${POSTGRES_CONTAINER:-worklingo-postgres}"
-DB_USER="${POSTGRES_USER:-worklingo}"
-DB_NAME="${POSTGRES_DB:-worklingo}"
+CONTAINER="${POSTGRES_CONTAINER:-bloom-postgres}"
+DB_USER="${POSTGRES_USER:-bloom}"
+DB_NAME="${POSTGRES_DB:-bloom}"
 OUT="deploy/schema.sql"
 
 dump() { docker exec "$CONTAINER" pg_dump -U "$DB_USER" -d "$DB_NAME" "$@"; }
@@ -14,17 +14,17 @@ dump() { docker exec "$CONTAINER" pg_dump -U "$DB_USER" -d "$DB_NAME" "$@"; }
 {
   cat << 'HDR'
 -- =====================================================================
--- WorkLingo — schema.sql (cấu trúc database đầy đủ)
+-- Bloóm — schema.sql (cấu trúc database đầy đủ)
 -- Sinh từ: pg_dump --schema-only + sổ migration Drizzle
 --
 -- CÁCH DÙNG (môi trường mới, database RỖNG):
 --   1) docker compose up -d        (hoặc Postgres có sẵn)
 --   2) Tạo DB rỗng nếu chưa có:
---        createdb -U worklingo worklingo
+--        createdb -U bloom bloom
 --   3) Nạp schema:
---        psql -U worklingo -d worklingo -f deploy/schema.sql
---      (qua docker: docker exec -i worklingo-postgres \
---         psql -U worklingo -d worklingo < deploy/schema.sql)
+--        psql -U bloom -d bloom -f deploy/schema.sql
+--      (qua docker: docker exec -i bloom-postgres \
+--         psql -U bloom -d bloom < deploy/schema.sql)
 --   4) Seed cấu hình mặc định + user dev:
 --        npm run db:seed && npx tsx lib/db/seed-user.ts
 --

@@ -55,7 +55,7 @@ export const users = pgTable("users", {
   email: text("email").unique(),
   emailVerified: timestamp("email_verified", { mode: "date" }),
   image: text("image"),
-  // Mở rộng WorkLingo:
+  // Mở rộng Bloóm:
   role: roleEnum("role").notNull().default("user"),
   passwordHash: text("password_hash"),
   disabled: boolean("disabled").notNull().default(false),

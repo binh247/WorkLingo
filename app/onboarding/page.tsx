@@ -14,7 +14,7 @@ export default async function OnboardingPage() {
       <header className="text-center">
         <h1 className="text-2xl font-black text-ink">Trình độ của bạn?</h1>
         <p className="mt-1 font-bold text-ink-muted">
-          Giúp WorkLingo bỏ qua những từ bạn đã biết. Có thể bỏ qua nếu không
+          Giúp Bloóm bỏ qua những từ bạn đã biết. Có thể bỏ qua nếu không
           chắc.
         </p>
       </header>

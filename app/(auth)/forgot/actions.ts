@@ -17,7 +17,7 @@ export async function requestResetAction(email: string): Promise<void> {
     const link = `${proto}://${host}/reset-password?email=${encodeURIComponent(e)}&token=${token}`;
     await sendEmail({
       to: e,
-      subject: "Đặt lại mật khẩu WorkLingo",
+      subject: "Đặt lại mật khẩu Bloóm",
       text: `Mở liên kết để đặt lại mật khẩu (hết hạn 30 phút): ${link}`,
     });
   }
