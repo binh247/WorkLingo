@@ -22,7 +22,13 @@ function hasSession(req: NextRequest): boolean {
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  if (pathname === "/" || PUBLIC_PREFIXES.some((p) => pathname.startsWith(p))) {
+  // Cho qua file tĩnh có đuôi mở rộng (vd /logo.png, /robots.txt) — tránh
+  // redirect ảnh public về /login (next/image fetch nội bộ không kèm cookie).
+  if (
+    pathname === "/" ||
+    /\.[^/]+$/.test(pathname) ||
+    PUBLIC_PREFIXES.some((p) => pathname.startsWith(p))
+  ) {
     return NextResponse.next();
   }
   if (!hasSession(req)) {
@@ -35,6 +41,6 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // Bỏ qua static assets + ảnh.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|sounds|lottie).*)"],
+  // Bỏ qua static assets + ảnh + mọi file có đuôi mở rộng (vd .png).
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|sounds|lottie|.*\\..*).*)"],
 };
